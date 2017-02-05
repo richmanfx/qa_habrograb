@@ -1,0 +1,117 @@
+// string site_page = "http://yandex.ru";
+// string site_page = "http://r5am.ru";
+// string site_page = "https://habrahabr.ru/page2/";
+
+// Получаем HTML документ
+            HtmlDocument document_html = new HtmlDocument();
+            try {
+                document_html = get_page_info(site_page);
+                log.Info("HTML страница получена");
+            } catch (Exception e) {
+                log.Error("Данные от сайта НЕ получены: {0}", e);
+                Console.ReadLine();
+                Environment.Exit(1);
+            }
+
+
+            
+            // Выбираем блок данных с постами
+            HtmlNode dataBlock = null;
+            try
+            {
+                dataBlock = document_html.DocumentNode.SelectSingleNode("//div[@class='posts']");   // Все блоки
+                log.Info("Получен блок данных с постами");
+            } catch (TimeoutException) {
+                log.Error("Блок данных с постами НЕ получен");
+                Console.ReadLine();
+                Environment.Exit(1);
+            }
+
+
+            // Выбираем заголовки и время постов в блоке
+
+            int counterItem = 0; // счётчик - по 10 постов на странице
+            HtmlNodeCollection items = dataBlock.SelectNodes("//div[@class='post']");
+            Console.WriteLine();
+            foreach (var item in items)
+            {
+                counterItem++;      // увеличиваем счетчик
+                Console.Write("Сылка на пост:\t\t" + item.SelectSingleNode("//a[@class='post_inner']").Attributes["href"].Value + "\n");
+                Console.Write("Заголовок поста:\t" + item.SelectSingleNode("//a[@class='post_inner']/h3[@class='title']/span[@class='flow']").InnerText + "\n");
+                Console.Write("Время поста:\t\t" + item.SelectSingleNode("//a[@class='post_inner']/div[@class='meta']/span[@class='time']").InnerText + "\n");
+                Console.Write("\n\n");
+                if (counterItem == 10) { break; } // если выбрали 10 записей, то остановить цикл
+            }
+
+
+
+                
+/*
+        // Проверка существования файла конфигурации
+        private bool ExistIniFile(string cw_win_user_folder, string config_file_name)
+        {
+            // Путь к папке файлов приложений пользователя
+            string user_app_path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            // Проверить существование папки
+            DirectoryInfo folder = new DirectoryInfo(Path.Combine(user_app_path, cw_win_user_folder));
+            if (!folder.Exists)
+            {
+                return false;       // INI-файла нет, так как нет папки для него
+            }
+            else
+            {
+                // Существует ли файл?
+                FileInfo ini_file = new FileInfo(Path.Combine(user_app_path,
+                                                              cw_win_user_folder,
+                                                              config_file_name));
+                if (!ini_file.Exists)
+                {
+                    return false;       // INI-файла нет
+                }
+            }
+            return true;       // INI-файл уже cуществует
+        }
+    */
+
+
+    /// <summary>
+    /// Классы для конфигурационных данных
+    /// </summary>
+    public class Grabber
+    {
+        public string port { get; set; }
+    }
+
+    public class CoreServer
+    {
+        public string domain_name { get; set; }
+        public string address { get; set; }
+        public string port { get; set; }
+    }
+
+    public class GrabberConfig
+    {
+        public Grabber grabber { get; set; }
+        public CoreServer core_server { get; set; }
+    }
+
+    /// <summary>
+    /// Загружает с сайта страницу в HtmlDocument
+    /// </summary>
+    /// <param name="page_site"></param> Адрес сайта   
+    /// <returns> Документ 'HtmlDocument' с загруженной страницей</returns>
+    private static HtmlDocument get_page_info(string page_site) {
+            log.Info("Запускаем браузер.");
+            IE browser = null;
+            try {
+                browser = new IE(page_site);
+                Settings.WaitForCompleteTimeOut = 20000;    // тайм-аут, по дефолту 30 сек
+                HtmlDocument doc = new HtmlDocument();      // объекта HTML Agility Pack
+                log.Info("Загружаем страницу...");
+                doc.LoadHtml(browser.Body.OuterHtml);       // загрузить страницу в документ
+                browser.Close();
+                return doc;
+            } catch (TimeoutException) { browser.Close(); }
+            return null;
+    } // end get_page_info
