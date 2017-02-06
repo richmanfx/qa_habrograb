@@ -119,10 +119,8 @@ namespace qa_habrograb
         /// <param name="Port"></param>
         public GrabServer(int port)
         {
-            string url = "http://127.0.0.1";
-            string prefix = String.Format("{0}:{1}/", url, port);     // Слушаем на всех интерфейсах на указанном порту
             listener = new HttpListener();    
-            listener.Prefixes.Add(prefix);
+            listener.Prefixes.Add(String.Format("http://*:{0}/", port));    // Слушаем на всех интерфейсах на указанном порту
             listener.Start();       // Начинаем слушать
 
             // Принимаем новые соединения от клиентов
@@ -133,28 +131,81 @@ namespace qa_habrograb
                 HttpListenerResponse response = context.Response;       //Объект ответа
 
                 // Ответ
-                string requestBody;     // Тело запроса
-                Stream inputStream = request.InputStream;
-                Encoding encoding = request.ContentEncoding;
-                StreamReader reader = new StreamReader(inputStream, encoding);
-                requestBody = reader.ReadToEnd();
+           //    Stream inputStream = request.InputStream;
+            //    Encoding encoding = request.ContentEncoding;
+            //    StreamReader reader = new StreamReader(inputStream, encoding);
+            //    string requestBody = reader.ReadToEnd();
 
                 log.Debug(String.Format("{0} запрос получен: {1}", request.HttpMethod, request.Url));
 
-                response.StatusCode = (int)HttpStatusCode.OK;       // Статус ответа
-                
-                using (Stream stream = response.OutputStream) { }       // Послать ответ
+                // Обработать команды 
+                commandParser(request, response);
+
+                // Послать ответ
+                using (Stream stream = response.OutputStream) { }       
             }
-        }
+        } // end конструктора GrabServer
+
+        private void commandParser(HttpListenerRequest request, HttpListenerResponse response)
+        {
+            // string ping_template;
+            string responseString;
+            byte[] buffer;
+
+            switch (request.HttpMethod)
+            {
+                case "GET":
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    responseString = @"<!DOCTYPE HTML>
+                                            <html><head></head><body>
+                                            <form method=""post"">
+                                            <p><b>Name: </b><br>
+                                            <input type=""text"" name=""myname"" size=""40""></p>
+                                            <p><input type=""submit"" value=""send""></p>
+                                            </form></body></html>";
+                    response.ContentType = "text/html; charset=UTF-8";
+                    buffer = Encoding.UTF8.GetBytes(responseString);
+                    response.ContentLength64 = buffer.Length;
+                    response.OutputStream.Write(buffer, 0, buffer.Length);
+                    break;
+
+                case "POST":
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    ShowRequestData(request);
+                    responseString = @"<!DOCTYPE HTML>
+                                            <html><head></head><body>
+                                            <h1>Данные успешно переданы!</h1>
+                                            </body></html>";
+                    response.ContentType = "text/html; charset=UTF-8";
+                    buffer = Encoding.UTF8.GetBytes(responseString);
+                    response.ContentLength64 = buffer.Length;
+                    response.OutputStream.Write(buffer, 0, buffer.Length);
+                    break;
+
+                default:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+            }
+        } // end commandParser
+
+        private void ShowRequestData(HttpListenerRequest request)
+        {
+                //есть данные от клиента?
+                if (!request.HasEntityBody) return;
+
+                Stream inputStream = request.InputStream;
+                Encoding encoding = request.ContentEncoding;
+                StreamReader reader = new StreamReader(inputStream, encoding);
+                string requestBody = reader.ReadToEnd();
+
+                log.Debug(String.Format("Данные из формы: " + requestBody));
+
+        } 
 
         // Останавливаем работу сервера
         ~GrabServer()
-        {
-            if (listener != null)   // если есть живой слушатель
-                listener.Stop();
-        }
-    }
-
-
+        { if (listener != null) listener.Stop(); } // если есть живой слушатель
+        
+    }  // end class GrabServer
 
 } // end namespace qa_habrograb
