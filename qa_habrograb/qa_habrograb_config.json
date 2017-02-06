@@ -1,11 +1,11 @@
 {
-    "grabber": {
-        "port": "7777"
+    grabber: {
+        port: 7777
     },
 
-    "core_server": {
-        "domain_name": "pflb.ru",
-        "address": "69.89.31.165",
-        "port": "9999"
+    core_server: {
+        domain_name: "pflb.ru",
+        address: "69.89.31.165",
+        port: 9999
     }
 }
