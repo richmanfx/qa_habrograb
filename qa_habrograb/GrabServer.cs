@@ -22,7 +22,8 @@ namespace qa_habrograb
         public GrabServer(int port)
         {
             listener = new HttpListener();
-            listener.Prefixes.Add(String.Format("http://*:{0}/", port));    // Слушаем на всех интерфейсах на указанном порту
+            // listener.Prefixes.Add(String.Format("http://0.0.0.0:{0}/", port));    // Слушаем на всех интерфейсах на указанном порту
+            listener.Prefixes.Add("http://*:7777/");
             listener.Start();       // Начинаем слушать
 
             // Принимаем новые соединения от клиентов

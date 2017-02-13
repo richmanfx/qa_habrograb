@@ -6,6 +6,10 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 using System.Threading;
+using OpenQA.Selenium;
+using OpenQA.Selenium.PhantomJS;
+using OpenQA.Selenium.Chrome;
+
 
 
 namespace qa_habrograb
@@ -24,7 +28,8 @@ namespace qa_habrograb
             Console.OutputEncoding = Encoding.UTF8;                 // Кодировка в консоли
             XmlConfigurator.Configure();                            // Конфигурация логера в XML-файле
             string config_file_name = "qa_habrograb_config.json";   // Имя файла конфигурации
-            string site_page = "https://m.habrahabr.ru";
+            string site_page = "https://habrahabr.ru";
+            string search_query = "selenium";
 
             // Считать настройки из файла конфигурации
             GrabberConfig config = new GrabberConfig();
@@ -42,11 +47,38 @@ namespace qa_habrograb
             log.Info(config.grabber.port);
             */
 
+            /*
             // Слушать команды от сервера
             log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
             new GrabServer(Convert.ToInt32(config.grabber.port));
+            */
+
+            // Грабить habrahabr.ru
+            log.Debug("Begin grabbing...");
+            PhantomJSDriver driver = new PhantomJSDriver();
+            // ChromeDriver driver = new ChromeDriver("web_drivers");
+            driver.Navigate().GoToUrl(site_page);
+            log.Debug("Инфо с сайта: " + driver.Title);
+
+            log.Debug("Кликаем на 'Поиск'");
+            driver.FindElementByXPath("//button[@id='search-form-btn']").Click();
+
+            log.Debug("Вводим поисковый запрос: '" + search_query + "'.");
+            driver.FindElementById("search-form-field").SendKeys(search_query);   //  "//input[@id='search-form-field']"
+
+            log.Debug("Нажимаем 'Enter'.");
+            driver.FindElementById("search-form-field").Submit();
+            log.Debug("Инфо с сайта: " + driver.Title);
 
 
+
+            
+
+
+
+            Console.Read();
+            driver.Close();
+            Environment.Exit(0);
         } // end Main
 
 
