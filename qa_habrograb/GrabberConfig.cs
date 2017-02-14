@@ -11,6 +11,8 @@
     public class Grabber
     {
         public string port { get; set; }
+        public string browser { get; set; }
+        public string browser_size { get; set; }
     }
 
     /// Класс для конфигурационных данных Сервера

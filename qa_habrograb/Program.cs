@@ -9,6 +9,7 @@ using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 
 
 
@@ -55,8 +56,10 @@ namespace qa_habrograb
 
             // Грабить habrahabr.ru
             log.Debug("Begin grabbing...");
-            PhantomJSDriver driver = new PhantomJSDriver();
-            // ChromeDriver driver = new ChromeDriver("web_drivers");
+
+            RemoteWebDriver driver = null;
+            driver = InitBrowser(config, driver);
+
             driver.Navigate().GoToUrl(site_page);
             log.Debug("Инфо с сайта: " + driver.Title);
 
@@ -64,7 +67,7 @@ namespace qa_habrograb
             driver.FindElementByXPath("//button[@id='search-form-btn']").Click();
 
             log.Debug("Вводим поисковый запрос: '" + search_query + "'.");
-            driver.FindElementById("search-form-field").SendKeys(search_query);   //  "//input[@id='search-form-field']"
+            driver.FindElementById("search-form-field").SendKeys(search_query);
 
             log.Debug("Нажимаем 'Enter'.");
             driver.FindElementById("search-form-field").Submit();
@@ -72,14 +75,46 @@ namespace qa_habrograb
 
 
 
-            
 
 
 
+            log.Debug("Работа закончена. Нажми 'Enter'.");
             Console.Read();
             driver.Close();
             Environment.Exit(0);
         } // end Main
+
+
+        /// Инициализирует WebDriver для браузера, указанного в конфигурационном файле 
+        private static RemoteWebDriver InitBrowser(GrabberConfig config, RemoteWebDriver driver)
+        {
+            if (config.grabber.browser == "phantomjs")
+                driver = new PhantomJSDriver();
+            else if (config.grabber.browser == "chrome")
+            {
+                driver = new ChromeDriver("web_drivers");
+                if (config.grabber.browser_size != null)
+                {
+                    // Выставить размер окна браузера
+                    log.Debug("Выставляем размер окна браузера");
+                    Char delimiter = 'x';
+                    int width = Convert.ToInt32(config.grabber.browser_size.Split(delimiter)[0]);
+                    int height = Convert.ToInt32(config.grabber.browser_size.Split(delimiter)[1]);
+                    driver.Manage().Window.Size = new System.Drawing.Size(width, height);
+                }
+                // Если размера нет в конфигурационном файле, то максимальный размер окна браузера
+                if (config.grabber.browser_size == null)
+                    log.Debug("Выставляем максимальный размер окна браузера");
+                    driver.Manage().Window.Maximize();
+            }
+            else
+            {
+                log.Error(String.Format("Browser not specified in config file '{0}'", config));
+                Console.Read();
+                Environment.Exit(1);
+            }
+            return driver;
+        }
 
 
         /// Считывает файл конфигурации. Если файла нет, то возвращает null.
