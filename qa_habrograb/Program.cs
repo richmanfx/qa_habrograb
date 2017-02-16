@@ -29,8 +29,9 @@ namespace qa_habrograb
             Console.OutputEncoding = Encoding.UTF8;                 // Кодировка в консоли
             XmlConfigurator.Configure();                            // Конфигурация логера в XML-файле
             string config_file_name = "qa_habrograb_config.json";   // Имя файла конфигурации
-            string site_page = "https://habrahabr.ru";
-            string search_query = "selenium";
+            string site_page = "https://habrahabr.ru";              // Ссылка на страницу сайта для скрапинга
+            string search_query = "selenium";                       // Поисковые фразы для скрапинга
+
 
             // Считать настройки из файла конфигурации
             GrabberConfig config = new GrabberConfig();
@@ -41,20 +42,26 @@ namespace qa_habrograb
                 Environment.Exit(1);
             }
 
-            /*  // Доступ к параметрам конфигурации
-            log.Info(config.core_server.domain_name);
-            log.Info(config.core_server.address);
-            log.Info(config.core_server.port);
-            log.Info(config.grabber.port);
-            */
-
-            /*
+            
             // Слушать команды от сервера
             log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
             new GrabServer(Convert.ToInt32(config.grabber.port));
-            */
+            
 
-            // Грабить habrahabr.ru
+            // Запустить скрапинг сайта
+            // GrabberCore(site_page, search_query, config);
+
+            // Окончание работы - для анализа сообщений в консоли
+            log.Debug("Работа закончена. Нажми 'Enter'.");
+            Console.Read();
+            Environment.Exit(0);
+        } // end Main
+
+
+        // Грабит заданный сайт по заданной строке поиска
+        private static void GrabberCore(string site_page, string search_query, GrabberConfig config)
+        {
+            
             log.Debug("Begin grabbing...");
 
             RemoteWebDriver driver = null;
@@ -73,16 +80,9 @@ namespace qa_habrograb
             driver.FindElementById("search-form-field").Submit();
             log.Debug("Инфо с сайта: " + driver.Title);
 
-
-
-
-
-
-            log.Debug("Работа закончена. Нажми 'Enter'.");
-            Console.Read();
             driver.Close();
-            Environment.Exit(0);
-        } // end Main
+            
+        }
 
 
         /// Инициализирует WebDriver для браузера, указанного в конфигурационном файле 

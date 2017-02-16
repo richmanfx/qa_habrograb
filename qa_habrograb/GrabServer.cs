@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace qa_habrograb
 {
@@ -22,8 +23,7 @@ namespace qa_habrograb
         public GrabServer(int port)
         {
             listener = new HttpListener();
-            // listener.Prefixes.Add(String.Format("http://0.0.0.0:{0}/", port));    // Слушаем на всех интерфейсах на указанном порту
-            listener.Prefixes.Add("http://*:7777/");
+            listener.Prefixes.Add(String.Format("http://*:{0}/", port));    // Слушаем на указанном порту
             listener.Start();       // Начинаем слушать
 
             // Принимаем новые соединения от клиентов
@@ -34,10 +34,10 @@ namespace qa_habrograb
                 HttpListenerResponse response = context.Response;       //Объект ответа
 
                 // Ответ
-                //    Stream inputStream = request.InputStream;
-                //    Encoding encoding = request.ContentEncoding;
-                //    StreamReader reader = new StreamReader(inputStream, encoding);
-                //    string requestBody = reader.ReadToEnd();
+                Stream inputStream = request.InputStream;
+                Encoding encoding = request.ContentEncoding;
+                StreamReader reader = new StreamReader(inputStream, encoding);
+                string requestBody = reader.ReadToEnd();
 
                 log.Debug(String.Format("{0} request is received: {1}", request.HttpMethod, request.Url));
 

@@ -1,36 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace qa_habrograb
+﻿namespace qa_habrograb
 {
+    /// Класс ответа Грабера на GET запрос проверки работоспособности (/ping)
     public class PingResponse
     {
-        public bool result { get; set; }
-        public Error error { get; set; }
+        public bool result { get; set; }        // "true" при готовности грабера к работе
+        public Error error { get; set; }        // описывает проблему при неготовности грабера к работе
     }
 
+    /// Информация о внутреннем исключении
     public class Inner
     {
-        public string className { get; set; }
-        public string message { get; set; }
-        public string stackTrace { get; set; }
+        public string className { get; set; }       // Класс исключения
+        public string message { get; set; }         // Сообщение исключения
+        public string stackTrace { get; set; }      // Стек вызовов исключения
     }
 
     public class Exception
     {
-        public string className { get; set; }
-        public string message { get; set; }
-        public string stackTrace { get; set; }
-        public Inner inner { get; set; }
+        public string className { get; set; }       // Класс исключения
+        public string message { get; set; }         // Сообщение исключения
+        public string stackTrace { get; set; }      // Стек вызовов исключения
+        public Inner inner { get; set; }            // Аналогичная информация о внутреннем исключении
     }
 
     public class Error
     {
-        public string text { get; set; }
-        public string time { get; set; }
-        public Exception exception { get; set; }
+        public string text { get; set; }            // Русскоязычное понятное и осмысленное описание ошибки
+        public string time { get; set; }            // Дата и время регистрации (отлова) ошибки
+        public Exception exception { get; set; }    // Информация об исключении, вызвавшем эту ошибку
     }
 }

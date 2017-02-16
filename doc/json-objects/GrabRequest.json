@@ -1,0 +1,12 @@
+{
+  "requestId": 13,
+  "version": 1,
+  "queries": [
+    "selenium",
+    "#testautomation"
+  ],
+  "period": {
+    "fromDate": "2017-01-01",
+    "toDate": "2017-01-31"
+  }
+}

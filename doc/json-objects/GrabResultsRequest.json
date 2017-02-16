@@ -1,0 +1,9 @@
+{
+  "requestId": 1,
+  "version": 123,
+  "grabber": "Тип GrabberInfo. Описание граббера.",
+  "results": [
+      "GrabResults": ???,
+      "GrabResults": ???
+  ]
+}
