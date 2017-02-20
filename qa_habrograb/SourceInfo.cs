@@ -3,10 +3,11 @@
     /// Описание источника новостей, с которым работает Грабер.
     public class SourceInfo
     {
-        public SourceInfo(string title, string url)
+        public SourceInfo(string title, string url, string logo="")
         {
             this.Title = title;
             this.Url = url;
+            this.Logo = logo;
         }
 
         public string Title { get; set; }       // Краткое человеческое наименование ресурса, 

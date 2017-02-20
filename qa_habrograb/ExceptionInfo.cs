@@ -13,7 +13,7 @@ namespace qa_habrograb
         {
             this.ClassName = className;
             this.Inner = inner;
-            List<string> StackTrace = new List<string>();
+            StackTrace = new List<string>();
         }
 
         public string ClassName { get; set; }           // Имя класса исключения.

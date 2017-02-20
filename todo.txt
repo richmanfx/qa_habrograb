@@ -1,12 +1,6 @@
 
-
-
-
- - Логотип Хабра размером до 100 кб. сделать.
-
- - Логотип Хабра закодировать в base64.
  
- - проверить имплементацию JSON объектов 
+
 
  - Заглушки на сеть пока сделать
 
@@ -20,7 +14,27 @@
 
 ==========
 Готово:
- - Сделать все объекты на основе доки с JSON
+
+ - проверить имплементацию JSON объектов 
+  	-- PingResponse					- V
+   	-- GrabResponse.json 			- V
+ 	-- ErrorInfo.json	    		- V
+ 	-- ExceptionInfo.json			- V
+ 	-- GrabRequest.json				- V
+ 	-- Period.json					- V
+ 	-- GrabResultsRequest.json   	- V
+ 	-- GrabberInfo.json          	- V
+ 	-- AuthorInfo.json				- V
+ 	-- SourceInfo.json		     	- V
+ 	-- GrabResults.json			 	- V
+ 	-- PostInfo.json			 	- V
+ 	-- ProcessingInfo.json  		- V
+ 	-- GrabResultsResponse.json		- V 
+
+ - Логотип Хабра размером до 100 кб. сделать.
+
+ - Логотип Хабра закодировать в base64.
+
  - проверить типы внутри JSON объектов - сравнить с докой и
    сверить комментарии в коде JSON объектов с Пояснением в доке
  	-- GrabResponse.json 			- V
@@ -28,7 +42,6 @@
  	-- ExceptionInfo.json			- V
  	-- GrabRequest.json				- V
  	-- Period.json					- V
- 	-- GrabResponse.json			- V
  	-- GrabResultsRequest.json   	- V
  	-- GrabberInfo.json          	- V
  	-- AuthorInfo.json				- V
@@ -37,6 +50,9 @@
  	-- PostInfo.json			 	- V
  	-- ProcessingInfo.json  		- V
  	-- GrabResultsResponse.json		- V
+ 	-- PingResponse					- V
+
+ - Сделать все объекты на основе доки с JSON
 
 
 ==============================================================

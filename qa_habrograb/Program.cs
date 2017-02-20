@@ -32,6 +32,7 @@ namespace qa_habrograb
             string config_file_name = "qa_habrograb_config.json";   // Имя файла конфигурации
             string site_page = "https://habrahabr.ru";              // Ссылка на страницу сайта для скрапинга
             string search_query = "selenium";                       // Поисковые фразы для скрапинга
+            string logo_base64 = "pictures/logo_habr.base64";       // Логотип источника новостей в base64
 
             PingResponse ping_response = new PingResponse(true);
             ping_response.error.Time = DateTime.Now.ToString("s");
@@ -40,6 +41,7 @@ namespace qa_habrograb
             ping_response.error.Exception.ClassName = "QAHabroGrabProgram";
             log.Debug(String.Format("ping_response.Result = {0}", ping_response.Result));
             log.Debug(String.Format("Ошибка: {0}", ping_response.error.Text));
+
 
             int requestId = 42;
             int version = 123;
@@ -58,9 +60,19 @@ namespace qa_habrograb
             grab_resp.Error.Exception.StackTrace.Add("Первый уровень стека");
             grab_resp.Error.Exception.StackTrace.Add("Второй уровень стека");
             grab_resp.Error.Exception.StackTrace.Add("Третий уровень стека");
-            // ExceptionInfo inner_exception = new ExceptionInfo();
-            ExceptionInfo ei = grab_resp.Error.Exception.Inner;
 
+            List<AuthorInfo> ail = new List<AuthorInfo>();
+            ail.Add(new AuthorInfo("Александр Ящук", "a.yashuk@pflb.ru"));
+            SourceInfo si = new SourceInfo("Хабрахабр", "https://habrahabr.ru", logo_base64);
+            GrabberInfo gi = new GrabberInfo("Первый грабер", "1.2.3", ail, si);
+            PostInfo pi = new PostInfo(site_page, "ru", title: "Заголовок типа");
+            ProcessingInfo proc_info = new ProcessingInfo(DateTime.UtcNow.ToString("s"), DateTime.Now.ToString("s"));
+            GrabResults grab_result_1 = new GrabResults(search_query, pi, proc_info);
+            List<GrabResults> grab_rezult_list = new List<GrabResults>();
+            grab_rezult_list.Add(grab_result_1);
+            GrabResultsRequest grrequ = new GrabResultsRequest(12, 15, gi, grab_rezult_list);
+
+            GrabResultsResponse grab_results_resp = new GrabResultsResponse(true);
 
 
             // Считать настройки из файла конфигурации

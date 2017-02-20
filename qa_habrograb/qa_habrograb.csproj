@@ -77,16 +77,21 @@
     <Compile Include="AuthorInfo.cs" />
     <Compile Include="ErrorInfo.cs" />
     <Compile Include="ExceptionInfo.cs" />
+    <Compile Include="GrabberInfo.cs" />
     <Compile Include="GrabRequest.cs" />
     <Compile Include="GrabResponse.cs" />
+    <Compile Include="GrabResults.cs" />
+    <Compile Include="GrabResultsRequest.cs" />
     <Compile Include="GrabResultsResponse.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PingResponse.cs" />
     <Compile Include="GrabServer.cs" />
     <Compile Include="GrabConfig.cs" />
+    <Compile Include="PostInfo.cs" />
     <Compile Include="ProcessingInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SourceInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
