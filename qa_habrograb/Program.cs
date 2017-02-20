@@ -34,6 +34,7 @@ namespace qa_habrograb
             string search_query = "selenium";                       // Поисковые фразы для скрапинга
             string logo_base64 = "pictures/logo_habr.base64";       // Логотип источника новостей в base64
 
+            /*
             PingResponse ping_response = new PingResponse(true);
             ping_response.error.Time = DateTime.Now.ToString("s");
             ping_response.error.Text = "Просто ошибка";
@@ -41,8 +42,9 @@ namespace qa_habrograb
             ping_response.error.Exception.ClassName = "QAHabroGrabProgram";
             log.Debug(String.Format("ping_response.Result = {0}", ping_response.Result));
             log.Debug(String.Format("Ошибка: {0}", ping_response.error.Text));
+            */
 
-
+            /*
             int requestId = 42;
             int version = 123;
             List<string> queries = new List<string>();
@@ -50,8 +52,9 @@ namespace qa_habrograb
             queries.Add("Второй запрос");
             Period prd = new Period(DateTime.Now.ToString("s"), DateTime.UtcNow.ToString("s"));
             GrabRequest gr = new GrabRequest(requestId, version, queries, prd);
-            
+            */
 
+            /*
             GrabResponse grab_resp = new GrabResponse(false);
             grab_resp.Error.Text = "Текст в ответе";
             grab_resp.Error.Time = DateTime.Now.ToString("s");
@@ -60,7 +63,9 @@ namespace qa_habrograb
             grab_resp.Error.Exception.StackTrace.Add("Первый уровень стека");
             grab_resp.Error.Exception.StackTrace.Add("Второй уровень стека");
             grab_resp.Error.Exception.StackTrace.Add("Третий уровень стека");
+            */
 
+            /*
             List<AuthorInfo> ail = new List<AuthorInfo>();
             ail.Add(new AuthorInfo("Александр Ящук", "a.yashuk@pflb.ru"));
             SourceInfo si = new SourceInfo("Хабрахабр", "https://habrahabr.ru", logo_base64);
@@ -71,9 +76,11 @@ namespace qa_habrograb
             List<GrabResults> grab_rezult_list = new List<GrabResults>();
             grab_rezult_list.Add(grab_result_1);
             GrabResultsRequest grrequ = new GrabResultsRequest(12, 15, gi, grab_rezult_list);
+            */
 
+            /*
             GrabResultsResponse grab_results_resp = new GrabResultsResponse(true);
-
+            */
 
             // Считать настройки из файла конфигурации
             GrabConfig config = new GrabConfig();
@@ -86,8 +93,8 @@ namespace qa_habrograb
 
             
             // Слушать команды от сервера
-            //log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
-            //new GrabServer(Convert.ToInt32(config.grabber.port));
+            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            new GrabServer(Convert.ToInt32(config.grabber.port));
 
 
             

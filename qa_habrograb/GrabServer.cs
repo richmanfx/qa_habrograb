@@ -1,4 +1,5 @@
 ﻿using log4net;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
@@ -81,14 +82,22 @@ namespace qa_habrograb
         {
             DateTime currentDateTime = DateTime.Now;
             response.StatusCode = (int)HttpStatusCode.OK;
+            PingResponse ping_response = new PingResponse(true);
 
-            //    responseString = String.Format("{'Result':'true','Error':{'text':'Русскоязычное понятное осмысленное описание ошибки.','time':'{0}','exception':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения','inner':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения'}}}}", currentDateTime.ToString("s"));
+
 
             // Читать: http://andrey.moveax.ru/post/tools-visualstudio-paste-as-json-or-xml
             // https://metanit.com/sharp/tutorial/6.5.php
             // http://xn--d1aiecikab7a.xn--p1ai/json_csharp/
             // https://msdn.microsoft.com/ru-ru/library/bb412179(v=vs.110).aspx
-            responseString = String.Format("Фыва:  'dadфывыфыв' : '{0}'", currentDateTime.ToString("s"));
+
+            responseString = JsonConvert.SerializeObject(ping_response);
+
+            //responseString = String.Format("{{\"Result\":\"true\",\"Error\":{{\"text\":\"Русскоязычное понятное " +
+              //  "осмысленное описание ошибки.\",\"time\":\"{0}\",\"exception\":{{\"className\":\"ИмяКласса\",\"message\":\"Сообщение" +
+              //  " исключения\",\"stackTrace\":\"Стек вызовов исключения\",\"inner\":{{\"className\":\"ИмяКласса\",\"message\":\"" +
+              //  "Сообщение исключения\",\"stackTrace\":\"Стек вызовов исключения\"}}}}}}}}", currentDateTime.ToString("s"));
+            // responseString = String.Format("{{\"Текущее время\": \"{0}\"}}", currentDateTime.ToString("s"));
 
             response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
@@ -104,10 +113,7 @@ namespace qa_habrograb
         {
             response.StatusCode = (int)HttpStatusCode.OK;
             ShowRequestData(request);
-            responseString = @"<!DOCTYPE HTML>
-                                            <html><head></head><body>
-                                            <h1>Данные успешно переданы!</h1>
-                                            </body></html>";
+            responseString = @"<!DOCTYPE HTML><html><head></head><body><h1>Данные успешно переданы!</h1></body></html>";
             response.ContentType = "text/html; charset=UTF-8";
             buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
