@@ -82,7 +82,7 @@ namespace qa_habrograb
             DateTime currentDateTime = DateTime.Now;
             response.StatusCode = (int)HttpStatusCode.OK;
 
-            //    responseString = String.Format("{'result':'true','error':{'text':'Русскоязычное понятное осмысленное описание ошибки.','time':'{0}','exception':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения','inner':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения'}}}}", currentDateTime.ToString("s"));
+            //    responseString = String.Format("{'Result':'true','Error':{'text':'Русскоязычное понятное осмысленное описание ошибки.','time':'{0}','exception':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения','inner':{'className':'ИмяКласса','message':'Сообщение исключения','stackTrace':'Стек вызовов исключения'}}}}", currentDateTime.ToString("s"));
 
             // Читать: http://andrey.moveax.ru/post/tools-visualstudio-paste-as-json-or-xml
             // https://metanit.com/sharp/tutorial/6.5.php

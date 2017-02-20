@@ -10,6 +10,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
+using System.Collections.Generic;
 
 
 
@@ -32,9 +33,38 @@ namespace qa_habrograb
             string site_page = "https://habrahabr.ru";              // Ссылка на страницу сайта для скрапинга
             string search_query = "selenium";                       // Поисковые фразы для скрапинга
 
+            PingResponse ping_response = new PingResponse(true);
+            ping_response.error.Time = DateTime.Now.ToString("s");
+            ping_response.error.Text = "Просто ошибка";
+            ping_response.error.Exception.Message = "Ошипка, блин.";
+            ping_response.error.Exception.ClassName = "QAHabroGrabProgram";
+            log.Debug(String.Format("ping_response.Result = {0}", ping_response.Result));
+            log.Debug(String.Format("Ошибка: {0}", ping_response.error.Text));
+
+            int requestId = 42;
+            int version = 123;
+            List<string> queries = new List<string>();
+            queries.Add("Первый запрос");
+            queries.Add("Второй запрос");
+            Period prd = new Period(DateTime.Now.ToString("s"), DateTime.UtcNow.ToString("s"));
+            GrabRequest gr = new GrabRequest(requestId, version, queries, prd);
+            
+
+            GrabResponse grab_resp = new GrabResponse(false);
+            grab_resp.Error.Text = "Текст в ответе";
+            grab_resp.Error.Time = DateTime.Now.ToString("s");
+            grab_resp.Error.Exception.ClassName = "СуперПупер класс";
+            grab_resp.Error.Exception.Message = "Ацкая мессага";
+            grab_resp.Error.Exception.StackTrace.Add("Первый уровень стека");
+            grab_resp.Error.Exception.StackTrace.Add("Второй уровень стека");
+            grab_resp.Error.Exception.StackTrace.Add("Третий уровень стека");
+            // ExceptionInfo inner_exception = new ExceptionInfo();
+            ExceptionInfo ei = grab_resp.Error.Exception.Inner;
+
+
 
             // Считать настройки из файла конфигурации
-            GrabberConfig config = new GrabberConfig();
+            GrabConfig config = new GrabConfig();
             config = GetSettingsFromConfigFile(config, config_file_name, log);
             if (config == null)
             {
@@ -44,8 +74,10 @@ namespace qa_habrograb
 
             
             // Слушать команды от сервера
-            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
-            new GrabServer(Convert.ToInt32(config.grabber.port));
+            //log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            //new GrabServer(Convert.ToInt32(config.grabber.port));
+
+
             
 
             // Запустить скрапинг сайта
@@ -59,7 +91,7 @@ namespace qa_habrograb
 
 
         // Грабит заданный сайт по заданной строке поиска
-        private static void GrabberCore(string site_page, string search_query, GrabberConfig config)
+        private static void GrabberCore(string site_page, string search_query, GrabConfig config)
         {
             
             log.Debug("Begin grabbing...");
@@ -86,7 +118,7 @@ namespace qa_habrograb
 
 
         /// Инициализирует WebDriver для браузера, указанного в конфигурационном файле 
-        private static RemoteWebDriver InitBrowser(GrabberConfig config, RemoteWebDriver driver)
+        private static RemoteWebDriver InitBrowser(GrabConfig config, RemoteWebDriver driver)
         {
             if (config.grabber.browser == "phantomjs")
                 driver = new PhantomJSDriver();
@@ -118,7 +150,7 @@ namespace qa_habrograb
 
 
         /// Считывает файл конфигурации. Если файла нет, то возвращает null.
-        private static GrabberConfig GetSettingsFromConfigFile(GrabberConfig config, string file_name, ILog log)
+        private static GrabConfig GetSettingsFromConfigFile(GrabConfig config, string file_name, ILog log)
         {
             if (File.Exists(file_name))      // Существует ли JSON файл конфигурации
             {
@@ -126,7 +158,7 @@ namespace qa_habrograb
                 // Считать JSON строку из файла
                 string json_string = File.ReadAllText(file_name, Encoding.UTF8);
                 // Десериализация
-                config = JsonConvert.DeserializeObject<GrabberConfig>(json_string);
+                config = JsonConvert.DeserializeObject<GrabConfig>(json_string);
                 return config;
             }
             else

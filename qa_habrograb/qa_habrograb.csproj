@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>qa_habrograb</RootNamespace>
     <AssemblyName>qa_habrograb</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -73,9 +74,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthorInfo.cs" />
+    <Compile Include="ErrorInfo.cs" />
+    <Compile Include="ExceptionInfo.cs" />
+    <Compile Include="GrabRequest.cs" />
+    <Compile Include="GrabResponse.cs" />
+    <Compile Include="GrabResultsResponse.cs" />
+    <Compile Include="Period.cs" />
     <Compile Include="PingResponse.cs" />
     <Compile Include="GrabServer.cs" />
-    <Compile Include="GrabberConfig.cs" />
+    <Compile Include="GrabConfig.cs" />
+    <Compile Include="ProcessingInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

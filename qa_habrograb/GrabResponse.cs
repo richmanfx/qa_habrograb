@@ -1,39 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace qa_habrograb
+﻿namespace qa_habrograb
 {
+    /// Ответ от Грабера к Ядру на запрос /grab для старта сбора новостей
     public class GrabResponse
     {
-        public string result { get; set; }
-        public Error error { get; set; }
-    }
+        public GrabResponse(bool result)
+        {
+            this.Result = result;
+            Error = new ErrorInfo("");
+        }
 
-    // Эти классы уже есть в другом месте
-    /*
-    public class Inner
-    {
-        public string className { get; set; }
-        public string message { get; set; }
-        public string stackTrace { get; set; }
+        public bool Result { get; set; }        // true - если граббер взялся за работу.
+        public ErrorInfo Error { get; set; }    // Описывает проблему если граббер не смог начать работу 
+                                                // (значение Result = false).
     }
-
-    public class Exception
-    {
-        public string className { get; set; }
-        public string message { get; set; }
-        public string stackTrace { get; set; }
-        public Inner inner { get; set; }
-    }
-
-    public class Error
-    {
-        public string text { get; set; }
-        public string time { get; set; }
-        public Exception exception { get; set; }
-    }
-    */
 }
