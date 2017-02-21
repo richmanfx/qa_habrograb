@@ -11,6 +11,7 @@ using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using System.Collections.Generic;
+using System.Collections;
 
 
 
@@ -44,15 +45,18 @@ namespace qa_habrograb
             log.Debug(String.Format("Ошибка: {0}", ping_response.error.Text));
             */
 
-            /*
+            
             int requestId = 42;
             int version = 123;
             List<string> queries = new List<string>();
             queries.Add("Первый запрос");
             queries.Add("Второй запрос");
             Period prd = new Period(DateTime.Now.ToString("s"), DateTime.UtcNow.ToString("s"));
-            GrabRequest gr = new GrabRequest(requestId, version, queries, prd);
-            */
+            GrabRequest gr1 = new GrabRequest(requestId, version, queries, prd);
+            GrabRequest gr2 = new GrabRequest(requestId+1, version+3, queries, prd);
+            GrabRequest gr3 = new GrabRequest(requestId+2, version+4, queries, prd);
+
+
 
             /*
             GrabResponse grab_resp = new GrabResponse(false);
@@ -91,12 +95,26 @@ namespace qa_habrograb
                 Environment.Exit(1);
             }
 
-            
+
             // Слушать команды от сервера
-            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
-            new GrabServer(Convert.ToInt32(config.grabber.port));
+            // log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            // new GrabServer(Convert.ToInt32(config.grabber.port));
 
+            // Проба очереди
+            Queue Q = new Queue();
 
+            while (Q.Count < 10)
+            {
+                Q.Enqueue(gr1);
+            }
+            
+            int a = Q.Count;
+
+            GrabRequest gr_qqq = new GrabRequest();
+            for (int i=1; i<=a; i++)
+            {
+                gr_qqq = (GrabRequest)Q.Dequeue();
+            }
             
 
             // Запустить скрапинг сайта

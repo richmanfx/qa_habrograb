@@ -5,6 +5,8 @@ namespace qa_habrograb
     /// Запрос на сбор новостей от Ядра к Граберу (/grab)
     public class GrabRequest
     {
+        public GrabRequest() {}
+
         public GrabRequest(int requestId, int version, List<string> queries, Period period)
         {
             this.RequestId = requestId;

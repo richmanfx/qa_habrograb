@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="qa_habrograb.AuthorInfo" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AuthorInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.ErrorInfo" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABACAAAAQA=</HashCode>
+      <FileName>ErrorInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.ExceptionInfo" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAACAAgAAAAAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>ExceptionInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabberInfo" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAgAAAAAAAAAAAAQAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabberInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabConfig" Collapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>GrabConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.Grabber" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQBAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.CoreServer" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAYAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabRequest" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAI=</HashCode>
+      <FileName>GrabRequest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabResponse" Collapsed="true">
+    <Position X="5.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabResults" Collapsed="true">
+    <Position X="7.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAABAAAAAACAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabResults.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabResultsRequest" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>GrabResultsRequest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabResultsResponse" Collapsed="true">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GrabResultsResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.GrabServer" Collapsed="true">
+    <Position X="4" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAAAAAAAQCAAAAKAAAAAAAAAAAAAAEAA=</HashCode>
+      <FileName>GrabServer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.Period" Collapsed="true">
+    <Position X="5.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAABAAA=</HashCode>
+      <FileName>Period.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.PingResponse">
+    <Position X="7.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PingResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.PostInfo" Collapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAECAAAAEAAAAAAgAAAAAAAABAACAAAAAAAAAQ=</HashCode>
+      <FileName>PostInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.ProcessingInfo" Collapsed="true">
+    <Position X="2.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ProcessingInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.QAHabroGrabProgram" Collapsed="true">
+    <Position X="4" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAACAAAAAAAQAAAAIAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="qa_habrograb.SourceInfo" Collapsed="true">
+    <Position X="5.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAEAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>SourceInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>
