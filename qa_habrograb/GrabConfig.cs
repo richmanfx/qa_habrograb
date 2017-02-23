@@ -10,9 +10,10 @@
     /// Класс для конфигурационных данных Грабера
     public class Grabber
     {
-        public string port { get; set; }                    // TCP порт Грабера для команд
+        public int port { get; set; }                       // TCP порт Грабера для команд
         public string browser { get; set; }                 // Браузер - phantomjs или chrome
         public string browser_size { get; set; }            // Размер окна браузера, например 1800x800
+        public int requests_queue_size { get; set; }         // Размер очереди запросов на грабинг
     }
 
     /// Класс для конфигурационных данных Сервера

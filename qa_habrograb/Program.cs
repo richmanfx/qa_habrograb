@@ -19,11 +19,14 @@ namespace qa_habrograb
 {
     class QAHabroGrabProgram
     {
+        // Однопоточное приложение
+        // [STAThread]
+
         // Логер
         private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));
 
-        // Однопоточное приложение
-        // [STAThread]
+        // Создать начальный ответ на /ping
+        public static PingResponse ping_response = new PingResponse(true);
 
         static void Main(string[] args)
         {
@@ -35,57 +38,6 @@ namespace qa_habrograb
             string search_query = "selenium";                       // Поисковые фразы для скрапинга
             string logo_base64 = "pictures/logo_habr.base64";       // Логотип источника новостей в base64
 
-            /*
-            PingResponse ping_response = new PingResponse(true);
-            ping_response.error.Time = DateTime.Now.ToString("s");
-            ping_response.error.Text = "Просто ошибка";
-            ping_response.error.Exception.Message = "Ошипка, блин.";
-            ping_response.error.Exception.ClassName = "QAHabroGrabProgram";
-            log.Debug(String.Format("ping_response.Result = {0}", ping_response.Result));
-            log.Debug(String.Format("Ошибка: {0}", ping_response.error.Text));
-            */
-
-            
-            int requestId = 42;
-            int version = 123;
-            List<string> queries = new List<string>();
-            queries.Add("Первый запрос");
-            queries.Add("Второй запрос");
-            Period prd = new Period(DateTime.Now.ToString("s"), DateTime.UtcNow.ToString("s"));
-            GrabRequest gr1 = new GrabRequest(requestId, version, queries, prd);
-            GrabRequest gr2 = new GrabRequest(requestId+1, version+3, queries, prd);
-            GrabRequest gr3 = new GrabRequest(requestId+2, version+4, queries, prd);
-
-
-
-            /*
-            GrabResponse grab_resp = new GrabResponse(false);
-            grab_resp.Error.Text = "Текст в ответе";
-            grab_resp.Error.Time = DateTime.Now.ToString("s");
-            grab_resp.Error.Exception.ClassName = "СуперПупер класс";
-            grab_resp.Error.Exception.Message = "Ацкая мессага";
-            grab_resp.Error.Exception.StackTrace.Add("Первый уровень стека");
-            grab_resp.Error.Exception.StackTrace.Add("Второй уровень стека");
-            grab_resp.Error.Exception.StackTrace.Add("Третий уровень стека");
-            */
-
-            /*
-            List<AuthorInfo> ail = new List<AuthorInfo>();
-            ail.Add(new AuthorInfo("Александр Ящук", "a.yashuk@pflb.ru"));
-            SourceInfo si = new SourceInfo("Хабрахабр", "https://habrahabr.ru", logo_base64);
-            GrabberInfo gi = new GrabberInfo("Первый грабер", "1.2.3", ail, si);
-            PostInfo pi = new PostInfo(site_page, "ru", title: "Заголовок типа");
-            ProcessingInfo proc_info = new ProcessingInfo(DateTime.UtcNow.ToString("s"), DateTime.Now.ToString("s"));
-            GrabResults grab_result_1 = new GrabResults(search_query, pi, proc_info);
-            List<GrabResults> grab_rezult_list = new List<GrabResults>();
-            grab_rezult_list.Add(grab_result_1);
-            GrabResultsRequest grrequ = new GrabResultsRequest(12, 15, gi, grab_rezult_list);
-            */
-
-            /*
-            GrabResultsResponse grab_results_resp = new GrabResultsResponse(true);
-            */
-
             // Считать настройки из файла конфигурации
             GrabConfig config = new GrabConfig();
             config = GetSettingsFromConfigFile(config, config_file_name, log);
@@ -96,25 +48,19 @@ namespace qa_habrograb
             }
 
 
-            // Слушать команды от сервера
-            // log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
-            // new GrabServer(Convert.ToInt32(config.grabber.port));
+            // Создать очередь запросов на граббинг
+            log.Debug("Create the requests queue.");
+            RequestsQueue rq = new RequestsQueue(config.grabber.requests_queue_size);
 
-            // Проба очереди
-            Queue Q = new Queue();
-
-            while (Q.Count < 10)
-            {
-                Q.Enqueue(gr1);
-            }
             
-            int a = Q.Count;
 
-            GrabRequest gr_qqq = new GrabRequest();
-            for (int i=1; i<=a; i++)
-            {
-                gr_qqq = (GrabRequest)Q.Dequeue();
-            }
+
+
+            // Слушать команды от сервера
+            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            new GrabServer(Convert.ToInt32(config.grabber.port));
+
+            
             
 
             // Запустить скрапинг сайта

@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Newtonsoft.Json;
+using qa_habrograb;
 using System;
 using System.IO;
 using System.Net;
@@ -82,16 +83,17 @@ namespace qa_habrograb
         {
             DateTime currentDateTime = DateTime.Now;
             response.StatusCode = (int)HttpStatusCode.OK;
-            PingResponse ping_response = new PingResponse(true);
 
 
+            // Про класс очереди:
+            //    https://metanit.com/sharp/tutorial/4.7.php
 
             // Читать: http://andrey.moveax.ru/post/tools-visualstudio-paste-as-json-or-xml
             // https://metanit.com/sharp/tutorial/6.5.php
             // http://xn--d1aiecikab7a.xn--p1ai/json_csharp/
             // https://msdn.microsoft.com/ru-ru/library/bb412179(v=vs.110).aspx
 
-            responseString = JsonConvert.SerializeObject(ping_response);
+            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
 
             //responseString = String.Format("{{\"Result\":\"true\",\"Error\":{{\"text\":\"Русскоязычное понятное " +
               //  "осмысленное описание ошибки.\",\"time\":\"{0}\",\"exception\":{{\"className\":\"ИмяКласса\",\"message\":\"Сообщение" +
