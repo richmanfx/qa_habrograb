@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace qa_habrograb
@@ -18,9 +19,7 @@ namespace qa_habrograb
 
         HttpListener listener;           // Слушатель сокета
 
-        /// <summary>
         /// Запускатель сервера
-        /// </summary>
         /// <param name="Port"></param>
         public GrabServer(int port)
         {
@@ -35,15 +34,9 @@ namespace qa_habrograb
                 HttpListenerRequest request = context.Request;          //Объект запроса
                 HttpListenerResponse response = context.Response;       //Объект ответа
 
-                // Ответ
-                Stream inputStream = request.InputStream;
-                Encoding encoding = request.ContentEncoding;
-                StreamReader reader = new StreamReader(inputStream, encoding);
-                string requestBody = reader.ReadToEnd();
-
                 log.Debug(String.Format("{0} request is received: {1}", request.HttpMethod, request.Url));
 
-                // Обработать команды 
+                // Обработать входящий запрос
                 SwitchingRequests(request, response);
 
                 // Послать ответ
@@ -85,21 +78,13 @@ namespace qa_habrograb
             response.StatusCode = (int)HttpStatusCode.OK;
 
 
-            // Про класс очереди:
-            //    https://metanit.com/sharp/tutorial/4.7.php
-
-            // Читать: http://andrey.moveax.ru/post/tools-visualstudio-paste-as-json-or-xml
-            // https://metanit.com/sharp/tutorial/6.5.php
+            
+            // Читать: 
             // http://xn--d1aiecikab7a.xn--p1ai/json_csharp/
             // https://msdn.microsoft.com/ru-ru/library/bb412179(v=vs.110).aspx
 
+            // В ответ послать PingResponse
             responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
-
-            //responseString = String.Format("{{\"Result\":\"true\",\"Error\":{{\"text\":\"Русскоязычное понятное " +
-              //  "осмысленное описание ошибки.\",\"time\":\"{0}\",\"exception\":{{\"className\":\"ИмяКласса\",\"message\":\"Сообщение" +
-              //  " исключения\",\"stackTrace\":\"Стек вызовов исключения\",\"inner\":{{\"className\":\"ИмяКласса\",\"message\":\"" +
-              //  "Сообщение исключения\",\"stackTrace\":\"Стек вызовов исключения\"}}}}}}}}", currentDateTime.ToString("s"));
-            // responseString = String.Format("{{\"Текущее время\": \"{0}\"}}", currentDateTime.ToString("s"));
 
             response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
@@ -114,26 +99,82 @@ namespace qa_habrograb
                                  out string responseString, out byte[] buffer)
         {
             response.StatusCode = (int)HttpStatusCode.OK;
-            ShowRequestData(request);
-            responseString = @"<!DOCTYPE HTML><html><head></head><body><h1>Данные успешно переданы!</h1></body></html>";
-            response.ContentType = "text/html; charset=UTF-8";
+            string incomingJson = CleaningRequestData(request);     // Очистка данных запроса
+            if (incomingJson == null)
+            {
+                string negative_response = "Данных в POST запросе нет.";
+                log.Debug(negative_response);
+                NegativeAnswer(negative_response);      // отрицательный ответ Ядру
+            }
+            else
+            {
+                // Верификация /grab запроса GrabRequest от Ядра - Json.NET Schema (платная???)
+                // ValidateGrabRequest(incomingJson);
+
+                // Десериализовать данные запроса в объект GrabRequest
+                GrabRequest gr = JsonConvert.DeserializeObject<GrabRequest>(incomingJson);
+
+                // Добавить запрос на грабинг в очередь
+                log.Debug("Добавление /grab запроса GrabRequest от Ядра в очередь.");
+                string result = QAHabroGrabProgram.rq.AddRequest(gr);
+                if (result == "OK")
+                {
+                    // Сформировать положительный ответ Ядру
+                    QAHabroGrabProgram.grab_response.Result = true;
+                    QAHabroGrabProgram.grab_response.Error.Text = result;
+                    QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
+                }
+                else
+                {
+                    NegativeAnswer(result);      // отрицательный ответ Ядру
+                }
+            }
+            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response);
+            response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
+            log.Debug(String.Format("Send answer on POST request: {0}", responseString));
             response.OutputStream.Write(buffer, 0, buffer.Length);
         }
 
-        private void ShowRequestData(HttpListenerRequest request)
+        /// Формирует негативный ответ Ядру
+        private static void NegativeAnswer(string error_text)
         {
-            //есть данные от клиента?
-            if (!request.HasEntityBody) return;
+            QAHabroGrabProgram.grab_response.Result = false;
+            QAHabroGrabProgram.grab_response.Error.Text = error_text;
+            QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
+        }
 
+        /*
+        /// Верификация /grab запроса GrabRequest от Ядра - Json.NET Schema: http://www.newtonsoft.com/jsonschema
+        private void ValidateGrabRequest(string incomingJson)
+        {
+            
+        }
+        */
+
+
+        /// Очистка данных запроса
+        private string CleaningRequestData(HttpListenerRequest request)
+        {
+            string clearRequestJson;
             Stream inputStream = request.InputStream;
-            Encoding encoding = request.ContentEncoding;
-            StreamReader reader = new StreamReader(inputStream, Encoding.Default);
-            string requestBody = reader.ReadLine();
+            StreamReader reader = new StreamReader(inputStream, request.ContentEncoding);
 
-            log.Debug(String.Format("Data: {0}", requestBody));
-
+            // Есть данные от клиента?
+            if (!request.HasEntityBody)
+            {
+                clearRequestJson = null;
+            }
+            else
+            {
+                string requestBody = reader.ReadToEnd().Replace("\n", "").Trim();   // Убрать переводы строк, начальные и конечные пробелы
+                clearRequestJson = Regex.Replace(requestBody, "[ ]+", " ");         // Убрать повторяющиеся пробелы
+                log.Debug(String.Format("Body: {0}", clearRequestJson));
+            }
+            inputStream.Close();
+            reader.Close();
+            return clearRequestJson;
         }
 
         // Останавливаем работу сервера

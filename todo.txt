@@ -1,36 +1,42 @@
 
+ - Не заполняется Период поиска статей в GrabRequest
 
+ - Верификация GrabRequest от Ядра - Json.NET Schema (платная???)
 
- - Заглушки на сеть пока сделать
-
- - Очередь для заданий сделать
-
- - Размер очереди вынести в конфиг-файл - 16 пока.
+ 
 
  - Вынести Грабер в отдельный файл
 
+ - хранилище данных (В объектах или SQLite)
 
- - хранилище данных (БД?)
- - сервер забирает по одной задаче из хранилища -
-   ограничить количество одновременно обрабатываемых задач
- - клиент, который добавляет записи в хранилище
+ - сервер забирает по одной задаче из хранилища - ограничить количество одновременно обрабатываемых задач
+
+ - грабер добавляет записи в хранилище
 
 ==========
 Готово:
 
+ - Возможно проверять ID запроса на грабинг и уже существующие ID в очереди.
+
+ - добавлять в очередь запросы на грабинг - проверить до заполнения очереди
+
+ - Размер очереди вынести в конфиг-файл - 16 пока.
+
+ - Очередь для заданий сделать
+
  - проверить имплементацию JSON объектов 
-  	-- PingResponse					- V
+  	-- PingResponse				- V
    	-- GrabResponse.json 			- V
  	-- ErrorInfo.json	    		- V
  	-- ExceptionInfo.json			- V
- 	-- GrabRequest.json				- V
- 	-- Period.json					- V
- 	-- GrabResultsRequest.json   	- V
- 	-- GrabberInfo.json          	- V
- 	-- AuthorInfo.json				- V
+ 	-- GrabRequest.json			- V
+ 	-- Period.json				- V
+ 	-- GrabResultsRequest.json   		- V
+ 	-- GrabberInfo.json          		- V
+ 	-- AuthorInfo.json			- V
  	-- SourceInfo.json		     	- V
- 	-- GrabResults.json			 	- V
- 	-- PostInfo.json			 	- V
+ 	-- GrabResults.json			- V
+ 	-- PostInfo.json			- V
  	-- ProcessingInfo.json  		- V
  	-- GrabResultsResponse.json		- V 
 
@@ -43,17 +49,17 @@
  	-- GrabResponse.json 			- V
  	-- ErrorInfo.json	    		- V
  	-- ExceptionInfo.json			- V
- 	-- GrabRequest.json				- V
- 	-- Period.json					- V
- 	-- GrabResultsRequest.json   	- V
- 	-- GrabberInfo.json          	- V
- 	-- AuthorInfo.json				- V
+ 	-- GrabRequest.json			- V
+ 	-- Period.json				- V
+ 	-- GrabResultsRequest.json   		- V
+ 	-- GrabberInfo.json          		- V
+ 	-- AuthorInfo.json			- V
  	-- SourceInfo.json		     	- V
- 	-- GrabResults.json			 	- V
- 	-- PostInfo.json			 	- V
+ 	-- GrabResults.json			- V
+ 	-- PostInfo.json			- V
  	-- ProcessingInfo.json  		- V
  	-- GrabResultsResponse.json		- V
- 	-- PingResponse					- V
+ 	-- PingResponse				- V
 
  - Сделать все объекты на основе доки с JSON
 

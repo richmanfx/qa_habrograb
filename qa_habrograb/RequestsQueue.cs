@@ -1,0 +1,79 @@
+﻿using log4net;
+using System;
+using System.Collections.Generic;
+
+namespace qa_habrograb
+{
+    class RequestsQueue
+    {
+        public RequestsQueue(int queue_size)
+        {
+            // Создать очередь запросов заданий от Ядра
+            request_queue = new Queue<GrabRequest>(queue_size);
+            this.QueueSize = queue_size;
+        }
+
+        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
+        private int QueueSize { get; set; }                                                         // Максимальный размер очереди
+        Queue<GrabRequest> request_queue;                                                           // Очередь запросов заданий от ядра
+        string Result;
+
+
+        // Добавляет в очередь запрос на грабинг
+        public string AddRequest(GrabRequest gr)
+        {
+            Result = "";
+            if (request_queue.Count >= QueueSize)
+            {
+                // Очередь переполнена
+                Result = String.Format("Запрос не добавлен - очередь переполнена, уже {0} запросов.", QueueSize);
+                log.Debug(Result);
+                setNegativeGrabberState(Result);
+            }
+            else
+            {
+                // Проверить на повтор ID запроса в очереди
+                foreach (var old_gr in request_queue)
+                {
+                    if(gr.RequestId == old_gr.RequestId)
+                    {
+                        Result = String.Format("Запрос не добавлен - запрос c ID={0} уже существует в очереди.", gr.RequestId);
+                        log.Debug(Result);
+                        setNegativeGrabberState(Result);
+                    }
+                }
+                if (Result == "")
+                {
+                    // Добавление в очередь запросов
+                    request_queue.Enqueue(gr);
+                    log.Debug(String.Format("Добавлен запрос в очередь. Запросов в очереди: {0} .", request_queue.Count));
+                    Result = "OK";
+                }
+            }
+            return this.Result;
+        }
+
+        /// Изменить состояние грабера на негативный
+        private void setNegativeGrabberState(string result)
+        {
+            QAHabroGrabProgram.ping_response.Result = false;
+            QAHabroGrabProgram.ping_response.error.Text = result;
+            QAHabroGrabProgram.ping_response.error.Time = DateTime.Now.ToString("s");
+        }
+
+        /// Забирает из очереди запрос на грабинг
+        public GrabRequest GetRequest() {
+            GrabRequest gr = new GrabRequest();
+            if (request_queue.Count == 0)
+            {
+                log.Debug("Очередь запросов заданий пуста.");
+            }
+            else
+            {
+                gr = request_queue.Dequeue();
+                log.Debug(String.Format("Изъят запрос из очереди. Осталось запросов в очереди: %d .", request_queue.Count));
+            }
+            return gr;
+        }
+    }
+}

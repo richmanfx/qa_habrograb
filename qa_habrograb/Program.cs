@@ -19,14 +19,12 @@ namespace qa_habrograb
 {
     class QAHabroGrabProgram
     {
-        // Однопоточное приложение
-        // [STAThread]
+        // [STAThread]          // Однопоточное приложение
 
-        // Логер
-        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));
-
-        // Создать начальный ответ на /ping
-        public static PingResponse ping_response = new PingResponse(true);
+        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
+        public static PingResponse ping_response = new PingResponse(true);                          // Ответ на /ping
+        public static GrabResponse grab_response = new GrabResponse(true);                          // Ответ на /grab
+        public static RequestsQueue rq;                                                             // Очередь запросов на граббинг
 
         static void Main(string[] args)
         {
@@ -50,7 +48,7 @@ namespace qa_habrograb
 
             // Создать очередь запросов на граббинг
             log.Debug("Create the requests queue.");
-            RequestsQueue rq = new RequestsQueue(config.grabber.requests_queue_size);
+            rq = new RequestsQueue(config.grabber.requests_queue_size);
 
             
 
