@@ -43,7 +43,7 @@ namespace qa_habrograb
         } // end конструктора GrabServer
 
 
-        // Парсер GET и POST запросов от сервера-ядра
+        /// Парсер GET и POST запросов от сервера-ядра
         private void SwitchingRequests(HttpListenerRequest request, HttpListenerResponse response)
         {
             // string ping_template;
@@ -60,6 +60,10 @@ namespace qa_habrograb
                     HendlingPOST(request, response, out responseString, out buffer);
                     break;
 
+                case "DELETE":
+                    HendlingDELETE(request, response, out responseString, out buffer);
+                    break;
+
                 default:
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
@@ -67,28 +71,23 @@ namespace qa_habrograb
         } // end SwitchingRequests
 
 
-        // Обработчик GET запроса от сервера-ядра
-        private static void HendlingGET(HttpListenerResponse response, 
-                                       out string responseString, 
-                                       out byte[] buffer)
+        /// Обработчик DELETE запроса для закрытия приложения
+        private void HendlingDELETE(HttpListenerRequest request, HttpListenerResponse response, 
+                                    out string responseString, out byte[] buffer)
         {
-            DateTime currentDateTime = DateTime.Now;
             response.StatusCode = (int)HttpStatusCode.OK;
 
-            // В ответ послать PingResponse
-            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
+            PositiveAnswer("Bye!");     // положительный ответ Ядру
 
-            response.ContentType = "content-type: application/json";
-            buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentLength64 = buffer.Length;
-            log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
-            response.OutputStream.Write(buffer, 0, buffer.Length);
+            SendResponse(response, out responseString, out buffer);
+            log.Debug("Работа Грабера закончена.");
+            Environment.Exit(0);
         }
 
 
-        // Обработчик POST запроса от сервера-ядра
+        /// Обработчик POST запроса от сервера-ядра
         private void HendlingPOST(HttpListenerRequest request, HttpListenerResponse response, 
-                                 out string responseString, out byte[] buffer)
+                                  out string responseString, out byte[] buffer)
         {
             response.StatusCode = (int)HttpStatusCode.OK;
             string incomingJson = CleaningRequestData(request);     // Очистка данных запроса
@@ -127,20 +126,45 @@ namespace qa_habrograb
                 string result = QAHabroGrabProgram.rq.AddRequest(gr);
                 if (result == "OK")
                 {
-                    // Сформировать положительный ответ Ядру
-                    QAHabroGrabProgram.grab_response.Result = true;
-                    QAHabroGrabProgram.grab_response.Error.Text = result;
-                    QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
-                    QAHabroGrabProgram.grab_response.Error.Exception.StackTrace.Clear();
-                    QAHabroGrabProgram.grab_response.Error.Exception.Message = "";
-                    QAHabroGrabProgram.grab_response.Error.Exception.ClassName = "";
+                    PositiveAnswer(result);     // положительный ответ Ядру
                 }
                 else
                 {
-                    NegativeAnswer(result);      // отрицательный ответ Ядру
+                    NegativeAnswer(result);     // отрицательный ответ Ядру
                 }
             }
             SendResponse(response, out responseString, out buffer);
+        }
+
+
+        /// Обработчик GET запроса от сервера-ядра
+        private static void HendlingGET(HttpListenerResponse response,
+                                       out string responseString,
+                                       out byte[] buffer)
+        {
+            DateTime currentDateTime = DateTime.Now;
+            response.StatusCode = (int)HttpStatusCode.OK;
+
+            // В ответ послать PingResponse
+            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
+
+            response.ContentType = "content-type: application/json";
+            buffer = Encoding.UTF8.GetBytes(responseString);
+            response.ContentLength64 = buffer.Length;
+            log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
+            response.OutputStream.Write(buffer, 0, buffer.Length);
+        }
+
+
+        /// Сформировать положительный ответ Ядру
+        private static void PositiveAnswer(string text)
+        {
+            QAHabroGrabProgram.grab_response.Result = true;
+            QAHabroGrabProgram.grab_response.Error.Text = text;
+            QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
+            QAHabroGrabProgram.grab_response.Error.Exception.StackTrace.Clear();
+            QAHabroGrabProgram.grab_response.Error.Exception.Message = "";
+            QAHabroGrabProgram.grab_response.Error.Exception.ClassName = "";
         }
 
         /// Отправление ответа на запрос
@@ -194,7 +218,7 @@ namespace qa_habrograb
             return clearRequestJson;
         }
 
-        // Останавливаем работу сервера
+        /// Останавливаем работу сервера
         ~GrabServer()
         { if (listener != null) listener.Stop(); } // если есть живой слушатель
 
