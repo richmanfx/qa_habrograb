@@ -32,12 +32,12 @@ namespace qa_habrograb
             }
             else
             {
-                // Проверить на повтор ID запроса в очереди
+                // Проверить на повтор equestId запроса в очереди
                 foreach (var old_gr in request_queue)
                 {
                     if(gr.RequestId == old_gr.RequestId)
                     {
-                        Result = String.Format("Запрос не добавлен - запрос c ID={0} уже существует в очереди.", gr.RequestId);
+                        Result = String.Format("Запрос не добавлен - запрос c equestId = {0} уже существует в очереди.", gr.RequestId);
                         log.Debug(Result);
                         setNegativeGrabberState(Result);
                     }
@@ -59,21 +59,25 @@ namespace qa_habrograb
             QAHabroGrabProgram.ping_response.Result = false;
             QAHabroGrabProgram.ping_response.error.Text = result;
             QAHabroGrabProgram.ping_response.error.Time = DateTime.Now.ToString("s");
+            QAHabroGrabProgram.grab_response.Error.Exception.StackTrace.Clear();
+            QAHabroGrabProgram.grab_response.Error.Exception.Message = "";
+            QAHabroGrabProgram.grab_response.Error.Exception.ClassName = "";
         }
 
         /// Забирает из очереди запрос на грабинг
         public GrabRequest GetRequest() {
-            GrabRequest gr = new GrabRequest();
+            var Result = new GrabRequest();
             if (request_queue.Count == 0)
             {
                 log.Debug("Очередь запросов заданий пуста.");
+                Result = null;
             }
             else
             {
-                gr = request_queue.Dequeue();
-                log.Debug(String.Format("Изъят запрос из очереди. Осталось запросов в очереди: %d .", request_queue.Count));
+                Result = request_queue.Dequeue();
+                log.Debug(String.Format("Изъят запрос из очереди. Осталось запросов в очереди: {0} .", request_queue.Count));
             }
-            return gr;
+            return Result;
         }
     }
 }

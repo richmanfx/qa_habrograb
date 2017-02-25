@@ -25,6 +25,7 @@ namespace qa_habrograb
         public static PingResponse ping_response = new PingResponse(true);                          // Ответ на /ping
         public static GrabResponse grab_response = new GrabResponse(true);                          // Ответ на /grab
         public static RequestsQueue rq;                                                             // Очередь запросов на граббинг
+        
 
         static void Main(string[] args)
         {
@@ -32,9 +33,10 @@ namespace qa_habrograb
             Console.OutputEncoding = Encoding.UTF8;                 // Кодировка в консоли
             XmlConfigurator.Configure();                            // Конфигурация логера в XML-файле
             string config_file_name = "qa_habrograb_config.json";   // Имя файла конфигурации
-            string site_page = "https://habrahabr.ru";              // Ссылка на страницу сайта для скрапинга
+
             string search_query = "selenium";                       // Поисковые фразы для скрапинга
             string logo_base64 = "pictures/logo_habr.base64";       // Логотип источника новостей в base64
+
 
             // Считать настройки из файла конфигурации
             GrabConfig config = new GrabConfig();
@@ -45,24 +47,27 @@ namespace qa_habrograb
                 Environment.Exit(1);
             }
 
-
             // Создать очередь запросов на граббинг
             log.Debug("Create the requests queue.");
             rq = new RequestsQueue(config.grabber.requests_queue_size);
 
-            
+            // Принимать команды от Ядра в отдельном потоке
+            Thread CommandReceiverThread = new Thread(delegate () { CommandReceiver(config); });
+            CommandReceiverThread.IsBackground = true;
+            CommandReceiverThread.Name = "Command Receiver Thread";
+            CommandReceiverThread.Start();
 
 
+            // Опрос очереди и запуск грабберов
+            for (;;)
+            {
+                GrabResults grab_result = QueuePolling(config);
+                Thread.Sleep(10000);
+            }
 
-            // Слушать команды от сервера
-            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
-            new GrabServer(Convert.ToInt32(config.grabber.port));
+            // Разместить результат в очереди результатов
+            //
 
-            
-            
-
-            // Запустить скрапинг сайта
-            // GrabberCore(site_page, search_query, config);
 
             // Окончание работы - для анализа сообщений в консоли
             log.Debug("Работа закончена. Нажми 'Enter'.");
@@ -71,62 +76,11 @@ namespace qa_habrograb
         } // end Main
 
 
-        // Грабит заданный сайт по заданной строке поиска
-        private static void GrabberCore(string site_page, string search_query, GrabConfig config)
+        /// Принимать команды от Ядра
+        private static void CommandReceiver(GrabConfig config)
         {
-            
-            log.Debug("Begin grabbing...");
-
-            RemoteWebDriver driver = null;
-            driver = InitBrowser(config, driver);
-
-            driver.Navigate().GoToUrl(site_page);
-            log.Debug("Инфо с сайта: " + driver.Title);
-
-            log.Debug("Кликаем на 'Поиск'");
-            driver.FindElementByXPath("//button[@id='search-form-btn']").Click();
-
-            log.Debug("Вводим поисковый запрос: '" + search_query + "'.");
-            driver.FindElementById("search-form-field").SendKeys(search_query);
-
-            log.Debug("Нажимаем 'Enter'.");
-            driver.FindElementById("search-form-field").Submit();
-            log.Debug("Инфо с сайта: " + driver.Title);
-
-            driver.Close();
-            
-        }
-
-
-        /// Инициализирует WebDriver для браузера, указанного в конфигурационном файле 
-        private static RemoteWebDriver InitBrowser(GrabConfig config, RemoteWebDriver driver)
-        {
-            if (config.grabber.browser == "phantomjs")
-                driver = new PhantomJSDriver();
-            else if (config.grabber.browser == "chrome")
-            {
-                driver = new ChromeDriver("web_drivers");
-                if (config.grabber.browser_size != null)
-                {
-                    // Выставить размер окна браузера
-                    log.Debug("Выставляем размер окна браузера");
-                    Char delimiter = 'x';
-                    int width = Convert.ToInt32(config.grabber.browser_size.Split(delimiter)[0]);
-                    int height = Convert.ToInt32(config.grabber.browser_size.Split(delimiter)[1]);
-                    driver.Manage().Window.Size = new System.Drawing.Size(width, height);
-                }
-                // Если размера нет в конфигурационном файле, то максимальный размер окна браузера
-                if (config.grabber.browser_size == null)
-                    log.Debug("Выставляем максимальный размер окна браузера");
-                    driver.Manage().Window.Maximize();
-            }
-            else
-            {
-                log.Error(String.Format("Browser not specified in config file '{0}'", config));
-                Console.Read();
-                Environment.Exit(1);
-            }
-            return driver;
+            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            new GrabServer(Convert.ToInt32(config.grabber.port));
         }
 
 
@@ -147,6 +101,25 @@ namespace qa_habrograb
                 log.Error(String.Format("Config file '{0}' not found.", file_name));
                 return null;
             }
+        }
+
+        /// Опрос очереди запросов и запуск грабберов
+        private static GrabResults QueuePolling(GrabConfig config)
+        {
+            GrabRequest gr_from_queue;
+
+            gr_from_queue = rq.GetRequest();        // Получить запрос из очереди
+
+            if (gr_from_queue == null)          // Если нет запросов в очереди
+            {
+                return null;
+            }
+
+            // Запустить грабер 
+            GrabberCore gc = new GrabberCore(gr_from_queue, config);
+            return gc.Grabbing();
+
+            
         }
 
 

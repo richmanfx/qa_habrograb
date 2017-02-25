@@ -52,5 +52,7 @@ ExceptionInfo ei = new ExceptionInfo(new QAHabroGrabProgram().GetType().Name, nu
             GrabResultsResponse grab_results_resp = new GrabResultsResponse(true);
             */
 
+-----
+selenium & #testautomation site:habrahabr.ru
 
 

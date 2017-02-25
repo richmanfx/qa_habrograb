@@ -3,7 +3,7 @@
     /// Период времени - дата в стандартном формате JS (без времени)
     public class Period
     {
-        public Period() {}
+       // public Period() {}
 
         public Period(string fromDate, string toDate)
         {
