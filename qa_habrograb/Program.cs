@@ -25,7 +25,9 @@ namespace qa_habrograb
         public static PingResponse ping_response = new PingResponse(true);                          // Ответ на /ping
         public static GrabResponse grab_response = new GrabResponse(true);                          // Ответ на /grab
         public static RequestsQueue rq;                                                             // Очередь запросов на граббинг
-        
+        public static string grab_version = "1.0.0";                                                // Версия программы
+        public static string habr_logo_file_name = "logo_habr.base64";                              // Логотип источника новостей в base64
+
 
         static void Main(string[] args)
         {
@@ -34,46 +36,53 @@ namespace qa_habrograb
             XmlConfigurator.Configure();                            // Конфигурация логера в XML-файле
             string config_file_name = "qa_habrograb_config.json";   // Имя файла конфигурации
 
-            string search_query = "selenium";                       // Поисковые фразы для скрапинга
-            string logo_base64 = "pictures/logo_habr.base64";       // Логотип источника новостей в base64
-
-
-            // Считать настройки из файла конфигурации
-            GrabConfig config = new GrabConfig();
-            config = GetSettingsFromConfigFile(config, config_file_name, log);
-            if (config == null)
+        // Считать настройки из файла конфигурации
+        GrabConfig Config = new GrabConfig();
+            Config = GetSettingsFromConfigFile(Config, config_file_name, log);
+            if (Config == null)
             {
                 log.Error(String.Format("Failed to load configuration settings from {0}.", config_file_name));
                 Environment.Exit(1);
             }
 
+            
+
             // Создать очередь запросов на граббинг
             log.Debug("Create the requests queue.");
-            rq = new RequestsQueue(config.grabber.requests_queue_size);
+            rq = new RequestsQueue(Config.grabber.requests_queue_size);
 
             // Принимать команды от Ядра в отдельном потоке
-            Thread CommandReceiverThread = new Thread(delegate () { CommandReceiver(config); });
-            CommandReceiverThread.IsBackground = true;
+            Thread CommandReceiverThread = new Thread(delegate () { CommandReceiver(Config); });
+            CommandReceiverThread.IsBackground = false;     // Основной поток
             CommandReceiverThread.Name = "Command Receiver Thread";
             CommandReceiverThread.Start();
 
+            // Опрос очереди и запуск грабберов в отдельном потоке
+            Thread GrabberRunnerThread = new Thread(delegate () { GrabberRunner(Config); });
+            GrabberRunnerThread.IsBackground = true;        // Фоновый поток
+            GrabberRunnerThread.Name = "Grabber Runner Thread";
+            GrabberRunnerThread.Start();
 
-            // Опрос очереди и запуск грабберов
-            for (;;)
-            {
-                GrabResults grab_result = QueuePolling(config);
-                Thread.Sleep(10000);
-            }
+
 
             // Разместить результат в очереди результатов
             //
 
 
-            // Окончание работы - для анализа сообщений в консоли
-            log.Debug("Работа закончена. Нажми 'Enter'.");
-            Console.Read();
-            Environment.Exit(0);
+
         } // end Main
+
+
+        /// Опрос очереди и запуск грабберов
+        private static void GrabberRunner(GrabConfig config)
+        {
+            for (;;)
+            {
+                int polling_frequency = 10;         // Время в секундах между опросом очереди запросов на грабинг
+                QueuePolling(config);
+                Thread.Sleep(polling_frequency * 1000);
+            }
+        }
 
 
         /// Принимать команды от Ядра
@@ -89,7 +98,7 @@ namespace qa_habrograb
         {
             if (File.Exists(file_name))      // Существует ли JSON файл конфигурации
             {
-                log.Debug(String.Format("Read parameters from a config file '{0}'.", file_name));
+                log.Debug(String.Format("Read parameters from a Config file '{0}'.", file_name));
                 // Считать JSON строку из файла
                 string json_string = File.ReadAllText(file_name, Encoding.UTF8);
                 // Десериализация
@@ -104,22 +113,21 @@ namespace qa_habrograb
         }
 
         /// Опрос очереди запросов и запуск грабберов
-        private static GrabResults QueuePolling(GrabConfig config)
+        private static void QueuePolling(GrabConfig config)
         {
             GrabRequest gr_from_queue;
 
             gr_from_queue = rq.GetRequest();        // Получить запрос из очереди
 
-            if (gr_from_queue == null)          // Если нет запросов в очереди
+            if (gr_from_queue == null)              // Если нет запросов в очереди
             {
-                return null;
+                return;
             }
 
             // Запустить грабер 
+            log.Debug(String.Format("{0}: Запускаем Грабер.", Thread.CurrentThread.Name));
             GrabberCore gc = new GrabberCore(gr_from_queue, config);
-            return gc.Grabbing();
-
-            
+            gc.Grabbing();
         }
 
 

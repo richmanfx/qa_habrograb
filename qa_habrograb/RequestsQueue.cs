@@ -1,6 +1,7 @@
 ﻿using log4net;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace qa_habrograb
 {
@@ -26,7 +27,7 @@ namespace qa_habrograb
             if (request_queue.Count >= QueueSize)
             {
                 // Очередь переполнена
-                Result = String.Format("Запрос не добавлен - очередь переполнена, уже {0} запросов.", QueueSize);
+                Result = String.Format("{1}: Запрос не добавлен - очередь переполнена, уже {0} запросов.", QueueSize, Thread.CurrentThread.Name);
                 log.Debug(Result);
                 setNegativeGrabberState(Result);
             }
@@ -37,7 +38,7 @@ namespace qa_habrograb
                 {
                     if(gr.RequestId == old_gr.RequestId)
                     {
-                        Result = String.Format("Запрос не добавлен - запрос c equestId = {0} уже существует в очереди.", gr.RequestId);
+                        Result = String.Format("{1}: Запрос не добавлен - запрос c equestId = {0} уже существует в очереди.", gr.RequestId, Thread.CurrentThread.Name);
                         log.Debug(Result);
                         setNegativeGrabberState(Result);
                     }
@@ -46,7 +47,7 @@ namespace qa_habrograb
                 {
                     // Добавление в очередь запросов
                     request_queue.Enqueue(gr);
-                    log.Debug(String.Format("Добавлен запрос в очередь. Запросов в очереди: {0} .", request_queue.Count));
+                    log.Debug(String.Format("{1}: Добавлен запрос в очередь. Запросов в очереди: {0} .", request_queue.Count, Thread.CurrentThread.Name));
                     Result = "OK";
                 }
             }
@@ -69,13 +70,13 @@ namespace qa_habrograb
             var Result = new GrabRequest();
             if (request_queue.Count == 0)
             {
-                log.Debug("Очередь запросов заданий пуста.");
+                log.Debug(String.Format("{0}: Очередь запросов заданий пуста.", Thread.CurrentThread.Name));
                 Result = null;
             }
             else
             {
                 Result = request_queue.Dequeue();
-                log.Debug(String.Format("Изъят запрос из очереди. Осталось запросов в очереди: {0} .", request_queue.Count));
+                log.Debug(String.Format("{1}: Изъят запрос из очереди. Осталось запросов в очереди: {0} .", request_queue.Count, Thread.CurrentThread.Name));
             }
             return Result;
         }

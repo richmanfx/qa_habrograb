@@ -7,9 +7,14 @@
     "requests_queue_size": 16
   },
 
-    "core_server": {
-        "domain_name": "pflb.ru",
-        "address": "69.89.31.165",
-        "port": 9999
-    }
+  "core_server": {
+    "domain_name": "pflb.ru",
+    "address": "69.89.31.165",
+    "port": 9999
+  },
+
+  "author": {
+    "author_name": "Александр Ящук",
+    "author_email": "a.yashuk@pflb.ru" 
+  }
 }

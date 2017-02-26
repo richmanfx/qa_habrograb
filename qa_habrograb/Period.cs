@@ -11,7 +11,7 @@
             this.ToDate = toDate;
         }
 
-        private string FromDate { get; set; }    // Дата и начала периода.
-        private string ToDate { get; set; }      // Дата окончания периода.
+        public string FromDate { get; set; }    // Дата и начала периода.
+        public string ToDate { get; set; }      // Дата окончания периода.
     }
 }

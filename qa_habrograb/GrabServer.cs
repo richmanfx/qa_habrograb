@@ -108,7 +108,7 @@ namespace qa_habrograb
                 {
                     gr = JsonConvert.DeserializeObject<GrabRequest>(incomingJson);
                 }
-                catch (Newtonsoft.Json.JsonReaderException ex)
+                catch (Exception ex)
                 {
                     QAHabroGrabProgram.grab_response.Result = false;
                     QAHabroGrabProgram.grab_response.Error.Text = "Ошибка в запросе GrabRequest от Ядра.";
