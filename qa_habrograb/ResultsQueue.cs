@@ -42,5 +42,24 @@ namespace qa_habrograb
             }
             return Result;
         }
+
+        /// Забирает из очереди результат
+        public GrabResultsRequest GetResult()
+        {
+            GrabResultsRequest Result;
+            if (results_queue.Count == 0)
+            {
+                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста.", Thread.CurrentThread.Name));
+                Result = null;
+            }
+            else
+            {
+                Result = results_queue.Dequeue();
+                log.Debug(String.Format("{1}: Изъят результат грабинга из очереди. Осталось результатов в очереди: {0} .", 
+                                        results_queue.Count, 
+                                        Thread.CurrentThread.Name));
+            }
+            return Result;
+        }
     }
 }

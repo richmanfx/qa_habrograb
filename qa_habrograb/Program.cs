@@ -61,30 +61,53 @@ namespace qa_habrograb
             // Принимать команды от Ядра в отдельном потоке
             Thread CommandReceiverThread = new Thread(delegate () { CommandReceiver(Config); });
             CommandReceiverThread.IsBackground = false;     // Основной поток
-            CommandReceiverThread.Name = "Command Receiver Thread";
+            CommandReceiverThread.Name = "CommandReceiver Thread";
             CommandReceiverThread.Start();
 
             // Опрос очереди и запуск грабберов в отдельном потоке
             Thread GrabberRunnerThread = new Thread(delegate () { GrabberRunner(Config); });
             GrabberRunnerThread.IsBackground = true;        // Фоновый поток
-            GrabberRunnerThread.Name = "Grabber Runner Thread";
+            GrabberRunnerThread.Name = "GrabberRunner Thread";
             GrabberRunnerThread.Start();
 
             // Опрос очереди результатов и отправка результатов Ядру в отдельном потоке
-            // 
-
+            Thread ResultSenderThread = new Thread(delegate () { ResultSender(Config); });
+            ResultSenderThread.IsBackground = true;        // Фоновый поток
+            ResultSenderThread.Name = "ResultSender Thread";
+            ResultSenderThread.Start();
 
 
         } // end Main
 
+        /// Опрос очереди результатов и отправка результатов Ядру
+        private static void ResultSender(GrabConfig config)
+        {
+            for (;;)
+            {
+                int polling_frequency = 43;              // Время в секундах между опросами очереди результатов
+                GrabResultsRequest grr_from_result_queue = res_q.GetResult();     // Получить запрос из очереди
+                if (grr_from_result_queue != null)
+                {
+                    // Отправить результат Ядру
+                    log.Debug(String.Format("{0}: Отправка результата грабинга Ядру.",
+                                                Thread.CurrentThread.Name));
 
-        /// Опрос очереди и запуск грабберов
-        private static void GrabberRunner(GrabConfig config)
+                    /// !!!!!  TODO!!!!! 
+                    GrabTransmitter gt = new GrabTransmitter(config, grr_from_result_queue);
+                    
+                }
+
+                Thread.Sleep(polling_frequency * 1000);     // В миллисекунды
+            }
+        }
+
+        /// Опрос очереди заявок и запуск грабберов
+        private static void GrabberRunner (GrabConfig config)
         {
             string result;
             for (;;)
             {
-                int polling_frequency = 10;         // Время в секундах между опросом очереди запросов на грабинг
+                int polling_frequency = 11;         // Время в секундах между опросами очереди запросов на грабинг
                 GrabResultsRequest GRR = QueuePolling(config);
                 if (GRR != null)
                 {
@@ -94,8 +117,9 @@ namespace qa_habrograb
                     {
                         // TODO: Заполнить состояние грабера - всё не ОК в ErrorInfo.
 
-                        log.Debug(String.Format("{1}: Результат грабинга НЕ размещён в очереди.",
-                                                Thread.CurrentThread.Name));
+                        log.Debug(String.Format("{0}: Результат грабинга НЕ размещён в очереди. {1}",
+                                                Thread.CurrentThread.Name,
+                                                result));
                     }
                 }
 

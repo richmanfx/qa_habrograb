@@ -17,5 +17,7 @@ namespace qa_habrograb
         public int Version { get; set; }                // Версия протокола, в которой граббер составлял сообщение.
         public GrabberInfo Grabber { get; set; }        // Описание граббера.
         public List<GrabResults> Results { get; set; }  // Результаты поиска по указанным Ядром ключевым словам.
+
+        
     }
 }

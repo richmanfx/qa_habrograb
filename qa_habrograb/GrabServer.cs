@@ -13,7 +13,7 @@ namespace qa_habrograb
     /// TCP сервер для приёма команд
     public class GrabServer
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
+        private static ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
 
         HttpListener listener;           // Слушатель сокета
 

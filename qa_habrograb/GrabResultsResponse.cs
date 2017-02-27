@@ -3,9 +3,8 @@
     /// Ответ от Ядра к Граберу после слива результатов скрапинга (/results)
     class GrabResultsResponse
     {
-        public GrabResultsResponse(bool result)
+        public GrabResultsResponse()
         {
-            this.Result = result;
             Error = new ErrorInfo("");
         }
 

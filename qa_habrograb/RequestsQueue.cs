@@ -69,7 +69,7 @@ namespace qa_habrograb
 
         /// Забирает из очереди запрос на грабинг
         public GrabRequest GetRequest() {
-            var Result = new GrabRequest();
+            GrabRequest Result;
             if (request_queue.Count == 0)
             {
                 log.Debug(String.Format("{0}: Очередь запросов заданий пуста.", Thread.CurrentThread.Name));
