@@ -9,13 +9,13 @@
   },
 
   "core_server": {
-    "domain_name": "pflb.ru",
-    "address": "69.89.31.165",
+    "domain_name": "192.168.1.7",
+    "address": "192.168.1.7",
     "port": 9999
   },
 
   "author": {
-    "author_name": "ΐλεκρΰνδπ ίωσκ",
+    "author_name": "ΠΠ»ΠµΠΊΡΠ°Π½Π΄Ρ€ Π―Ρ‰ΡƒΠΊ",
     "author_email": "a.yashuk@pflb.ru" 
   }
 }

@@ -174,7 +174,7 @@ namespace qa_habrograb
             response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
-            log.Debug(String.Format("{1}: Send answer on POST request: {0}.", responseString, Thread.CurrentThread.Name));
+            log.Debug(String.Format("{1}: Send answer: {0}.", responseString, Thread.CurrentThread.Name));
             response.OutputStream.Write(buffer, 0, buffer.Length);
         }
 

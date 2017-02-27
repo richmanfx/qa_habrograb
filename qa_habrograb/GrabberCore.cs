@@ -104,7 +104,7 @@ namespace qa_habrograb
             // Описание источника новостей
             string habr_logo = System.IO.File.ReadAllText(QAHabroGrabProgram.habr_logo_file_name, Encoding.Default);    // Логотип
             SourceInfo Si = new SourceInfo("Хабрахабр - крупнейший в Европе ресурс материалов для IT-специалистов.",
-                                           "https://habrahabr.ru", habr_logo);
+                                           site_page, habr_logo);
             GrabberInfo Gi = new GrabberInfo("Сборщик информации о статьях сайта \"www.habrahabr.ru\" по ключевым фразам.",
                                             QAHabroGrabProgram.grab_version, AiList, Si);
             GrabResultsRequest grr = new GrabResultsRequest(grabbingRequest.RequestId, grabbingRequest.Version, Gi, grabResultsList);
@@ -190,7 +190,7 @@ namespace qa_habrograb
                     // При попадание даты статьи в требуемый диапазон - добавить статью в список
                     if (article_date > from_date && article_date < to_date)
                     {
-                        // TODO: Заменить на добавление сразу в GrabResults
+                        // TODO: Заменить на добавление сразу в GrabResults???
                         sa_list.Add(sa);        // Добавить пре-статью в список
                     }
                 }

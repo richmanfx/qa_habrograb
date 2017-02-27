@@ -46,7 +46,7 @@ namespace qa_habrograb
             {
                 DataFromCore = reader.ReadToEnd();
             }
-            log.Debug(String.Format("{0}: От Ядра получен \"GrabResultsRequest\": {1}", 
+            log.Debug(String.Format("{0}: От Ядра получен \"GrabResultsResponse\": {1}", 
                                     Thread.CurrentThread.Name,
                                     DataFromCore));
 
@@ -58,7 +58,7 @@ namespace qa_habrograb
                 GrabResResp = JsonConvert.DeserializeObject<GrabResultsResponse>(DataFromCore);
             } catch (Exception ex)
             {
-                log.Debug(String.Format("{0}: Ответ \"GrabResultsRequest\" от Ядра имеет неверную структуру: {1}",
+                log.Debug(String.Format("{0}: Ответ \"GrabResultsResponse\" от Ядра имеет неверную структуру:\n{1}",
                                         Thread.CurrentThread.Name,
                                         ex));
             }
@@ -68,12 +68,16 @@ namespace qa_habrograb
             {
                 log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" принят Ядром",
                                     Thread.CurrentThread.Name));
-                // Правильно бы только сейчас удалить 'GrabResultsRequest' из выходной очереди, но мы его уже изъяли...
+                // TODO:  Правильно бы только сейчас удалить 'GrabResultsRequest' из выходной очереди, но мы его уже изъяли...
             }
             else
             {
-                log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" Ядром НЕ принят: {1}\n\n{2}\n\n{3}\n\n" +
-                                        "ClassName: {4}\n\nStackTrace: {5}",
+                log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" Ядром НЕ принят:\n" +
+                                        "Error.Time: {1}\n" +
+                                        "Error.Text: {2}\n" +
+                                        "Error.Exception.Message: {3}\n" +
+                                        "Error.Exception.ClassName: {4}\n" +
+                                        "StackTrace: {5}\n",
                                     Thread.CurrentThread.Name,
                                     GrabResResp.Error.Time,
                                     GrabResResp.Error.Text,
@@ -95,14 +99,14 @@ namespace qa_habrograb
                     log.Debug(String.Format("{0}: Результат Ядру будет отправлен на \"{1}\".",
                                             Thread.CurrentThread.Name,
                                             Config.core_server.domain_name));
-                    Url = String.Format("http://{0}", Config.core_server.domain_name);
+                    Url = String.Format("http://{0}:{1}", Config.core_server.domain_name, Config.core_server.port);
                 }
                 else
                 {
                     log.Debug(String.Format("{0}: Результат Ядру будет отправле по IP {1} .",
                                             Thread.CurrentThread.Name,
                                             Config.core_server.address));
-                    Url = String.Format("http://{0}", Config.core_server.address);
+                    Url = String.Format("http://{0}:{1}", Config.core_server.address, Config.core_server.port);
                 }
             }
             catch (Exception ex)
