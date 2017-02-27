@@ -32,23 +32,12 @@ namespace qa_habrograb
         {
             log.Debug(String.Format("{1}: Begin grabbing, equestId = {0}.", GrabbingRequest.RequestId, Thread.CurrentThread.Name));
             string StartTime = DateTime.Now.ToString("s");          // Время начала грабинга
-
-            // Сборка поискового запроса
-            string search_query = "";
-            foreach (var query in GrabbingRequest.Queries)
-            {
-                search_query += query;
-                if (query != GrabbingRequest.Queries.Last())
-                {
-                    search_query += " ";
-                }
-            }
+            string search_query = BuildingSearchQuery();            // Сборка поискового запроса
 
             // Требуемые даты статей
             Period p = GrabbingRequest.Period;
             DateTime from_date = ConvertGrabRequestDate(p.FromDate);
             DateTime to_date = ConvertGrabRequestDate(p.ToDate);
-
 
             RemoteWebDriver driver = null;
             driver = InitBrowser(Config, driver);
@@ -84,6 +73,21 @@ namespace qa_habrograb
             driver.Close();     // Браузер загрыть
 
             return GrResReq;
+        }
+
+        /// Сборка поискового запроса
+        private string BuildingSearchQuery()
+        {
+            string search_query = "";
+            foreach (var query in GrabbingRequest.Queries)
+            {
+                search_query += query;
+                if (query != GrabbingRequest.Queries.Last())
+                {
+                    search_query += " ";
+                }
+            }
+            return search_query;
         }
 
         /// Грабит статьи по ссылкам из списка пре-статей, помещает в список GrabResults

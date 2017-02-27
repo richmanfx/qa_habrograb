@@ -12,8 +12,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using System.Collections.Generic;
 using System.Collections;
-
-
+using System.Diagnostics;
 
 namespace qa_habrograb
 {
@@ -42,18 +41,20 @@ namespace qa_habrograb
             Config = GetSettingsFromConfigFile(Config, config_file_name, log);
             if (Config == null)
             {
-                log.Error(String.Format("Failed to load configuration settings from {0}.", config_file_name));
+                log.Error(String.Format("{1}: Failed to load configuration settings from {0}.", 
+                                        config_file_name,
+                                        new StackTrace(false).GetFrame(0).GetMethod().Name));
                 Environment.Exit(1);
             }
 
             
 
             // Создать очередь запросов на грабинг
-            log.Debug("Create the requests queue.");
+            log.Debug(String.Format("{0}: Create the requests queue.", new StackTrace(false).GetFrame(0).GetMethod().Name));
             req_q = new RequestsQueue(Config.grabber.requests_queue_size);
 
             // Создать очередь результатов грабинга
-            log.Debug("Create the results queue.");
+            log.Debug(String.Format("{0}: Create the results queue.", new StackTrace(false).GetFrame(0).GetMethod().Name));
             res_q = new ResultsQueue(Config.grabber.results_queue_size);
 
 
@@ -69,8 +70,6 @@ namespace qa_habrograb
             GrabberRunnerThread.Name = "Grabber Runner Thread";
             GrabberRunnerThread.Start();
 
-
-
             // Опрос очереди результатов и отправка результатов Ядру в отдельном потоке
             // 
 
@@ -82,17 +81,25 @@ namespace qa_habrograb
         /// Опрос очереди и запуск грабберов
         private static void GrabberRunner(GrabConfig config)
         {
+            string result;
             for (;;)
             {
                 int polling_frequency = 10;         // Время в секундах между опросом очереди запросов на грабинг
                 GrabResultsRequest GRR = QueuePolling(config);
                 if (GRR != null)
                 {
-                    // Разместить GRR в очереди результатов          TODO: !!!!!
-                    
+                    // Разместить GRR в очереди результатов
+                    result = res_q.AddResult(GRR);
+                    if (result != "OK")
+                    {
+                        // TODO: Заполнить состояние грабера - всё не ОК в ErrorInfo.
+
+                        log.Debug(String.Format("{1}: Результат грабинга НЕ размещён в очереди.",
+                                                Thread.CurrentThread.Name));
+                    }
                 }
 
-                Thread.Sleep(polling_frequency * 1000);
+                Thread.Sleep(polling_frequency * 1000);     // В миллисекунды
             }
         }
 
@@ -100,7 +107,9 @@ namespace qa_habrograb
         /// Принимать команды от Ядра
         private static void CommandReceiver(GrabConfig config)
         {
-            log.Debug(String.Format("Start accepting commands server on port '{0}'.", config.grabber.port));
+            log.Debug(String.Format("{1}: Start accepting commands server on port '{0}'.", 
+                                    config.grabber.port,
+                                    new StackTrace(false).GetFrame(0).GetMethod().Name));
             new GrabServer(Convert.ToInt32(config.grabber.port));
         }
 
@@ -110,7 +119,9 @@ namespace qa_habrograb
         {
             if (File.Exists(file_name))      // Существует ли JSON файл конфигурации
             {
-                log.Debug(String.Format("Read parameters from a Config file '{0}'.", file_name));
+                log.Debug(String.Format("{1}: Read parameters from a Config file '{0}'.", 
+                                        file_name,
+                                        new StackTrace(false).GetFrame(0).GetMethod().Name));
                 // Считать JSON строку из файла
                 string json_string = File.ReadAllText(file_name, Encoding.UTF8);
                 // Десериализация
@@ -119,7 +130,9 @@ namespace qa_habrograb
             }
             else
             {
-                log.Error(String.Format("Config file '{0}' not found.", file_name));
+                log.Error(String.Format("{1}: Config file '{0}' not found.",
+                                         file_name,
+                                         new StackTrace(false).GetFrame(0).GetMethod().Name));
                 return null;
             }
         }
