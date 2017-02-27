@@ -4,7 +4,8 @@
     "browser": "chrome",
     //"browser_size": "1800x800"
     "port": 7777,
-    "requests_queue_size": 16
+    "requests_queue_size": 16,
+    "results_queue_size": 64
   },
 
   "core_server": {

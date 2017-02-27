@@ -15,19 +15,21 @@ namespace qa_habrograb
         }
 
         private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
-        private int QueueSize { get; set; }                                                         // Максимальный размер очереди
-        Queue<GrabRequest> request_queue;                                                           // Очередь запросов заданий от ядра
+        private int QueueSize { get; set; }                   // Максимальный размер очереди
+        Queue<GrabRequest> request_queue;                     // Очередь запросов заданий от ядра
         string Result;
 
 
-        // Добавляет в очередь запрос на грабинг
+        /// Добавляет в очередь запрос на грабинг
         public string AddRequest(GrabRequest gr)
         {
             Result = "";
             if (request_queue.Count >= QueueSize)
             {
                 // Очередь переполнена
-                Result = String.Format("{1}: Запрос не добавлен - очередь переполнена, уже {0} запросов.", QueueSize, Thread.CurrentThread.Name);
+                Result = String.Format("{1}: Запрос не добавлен - очередь переполнена, уже {0} запросов.", 
+                                       QueueSize, 
+                                       Thread.CurrentThread.Name);
                 log.Debug(Result);
                 setNegativeGrabberState(Result);
             }
@@ -51,7 +53,7 @@ namespace qa_habrograb
                     Result = "OK";
                 }
             }
-            return this.Result;
+            return Result;
         }
 
         /// Изменить состояние грабера на негативный

@@ -65,8 +65,8 @@ namespace qa_habrograb
 
 
 
-            // Разместить результат в очереди результатов
-            //
+            // Опрос очереди результатов и отправка результатов Ядру в отдельном потоке
+            // TODO: !!!!!
 
 
 
@@ -79,7 +79,13 @@ namespace qa_habrograb
             for (;;)
             {
                 int polling_frequency = 10;         // Время в секундах между опросом очереди запросов на грабинг
-                QueuePolling(config);
+                GrabResultsRequest GRR = QueuePolling(config);
+                if (GRR != null)
+                {
+                    // Разместить GRR в очереди результатов          TODO: !!!!!
+                    
+                }
+
                 Thread.Sleep(polling_frequency * 1000);
             }
         }
@@ -113,7 +119,7 @@ namespace qa_habrograb
         }
 
         /// Опрос очереди запросов и запуск грабберов
-        private static void QueuePolling(GrabConfig config)
+        private static GrabResultsRequest QueuePolling(GrabConfig config)
         {
             GrabRequest gr_from_queue;
 
@@ -121,13 +127,15 @@ namespace qa_habrograb
 
             if (gr_from_queue == null)              // Если нет запросов в очереди
             {
-                return;
+                return null;
             }
 
             // Запустить грабер 
             log.Debug(String.Format("{0}: Запускаем Грабер.", Thread.CurrentThread.Name));
             GrabberCore gc = new GrabberCore(gr_from_queue, config);
-            gc.Grabbing();
+            GrabResultsRequest GrResReq = gc.Grabbing();
+
+            return GrResReq;
         }
 
 

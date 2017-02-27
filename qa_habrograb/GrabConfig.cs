@@ -14,7 +14,8 @@
         public int port { get; set; }                       // TCP порт Грабера для команд.
         public string browser { get; set; }                 // Браузер - phantomjs или chrome.
         public string browser_size { get; set; }            // Размер окна браузера, например 1800x800.
-        public int requests_queue_size { get; set; }         // Размер очереди запросов на грабинг.
+        public int requests_queue_size { get; set; }        // Размер очереди запросов на грабинг.
+        public int results_queue_size { get; set; }         // Размер очереди результатов после грабинга.
     }
 
     /// Класс конфигурационных данных Сервера

@@ -28,7 +28,7 @@ namespace qa_habrograb
 
         
         /// Грабинг
-        public List<GrabResults> Grabbing()
+        public GrabResultsRequest Grabbing()
         {
             log.Debug(String.Format("{1}: Begin grabbing, equestId = {0}.", GrabbingRequest.RequestId, Thread.CurrentThread.Name));
             string StartTime = DateTime.Now.ToString("s");          // Время начала грабинга
@@ -78,26 +78,24 @@ namespace qa_habrograb
             log.Debug(String.Format("{0}: Выбираем статьи в требуемый период дат.", Thread.CurrentThread.Name));
             GetSmallArticleInTrueDate(from_date, to_date, driver, SaList);
 
-            // Грабить отдельные статьи
-            List<GrabResults> GrList = new List<GrabResults>();        // Коллекция результатов грабинга
-            ArticleGrabber(driver, GrabbingRequest, search_query, SaList, GrList, StartTime);
+            // Грабить статьи
+            GrabResultsRequest GrResReq = ArticleGrabber(driver, GrabbingRequest, search_query, SaList, StartTime);
 
-            driver.Close();
+            driver.Close();     // Браузер загрыть
 
-            return GrList;
+            return GrResReq;
         }
 
         /// Грабит статьи по ссылкам из списка пре-статей, помещает в список GrabResults
-        private void ArticleGrabber(RemoteWebDriver driver, GrabRequest grabbingRequest, string searchQuery,
-                                    List<SmallArticle> saList, List<GrabResults> grabResultsList,
-                                    string StartTime)
+        private GrabResultsRequest ArticleGrabber(RemoteWebDriver driver, GrabRequest grabbingRequest, string searchQuery,
+                                    List<SmallArticle> saList, string StartTime)
         {
             // Информация об авторах
             List<AuthorInfo> AiList = new List<AuthorInfo>();
             // TODO: Заполнять в цикле про нескольких авторов - второму автору вводная  :-)
             AiList.Add(new AuthorInfo(Config.author.author_name, Config.author.author_email));
 
-            
+            List<GrabResults> grabResultsList = new List<GrabResults>();        // Коллекция результатов грабинга
 
             // Описание источника новостей
             string habr_logo = System.IO.File.ReadAllText(QAHabroGrabProgram.habr_logo_file_name, Encoding.Default);    // Логотип
@@ -124,16 +122,20 @@ namespace qa_habrograb
 
                 GrabbingResult.SourceDescription.Language = LanguageIdentifier(article);      // Определение языка статьи - "ru" или "en"
 
-                //div[@class='post post_full']      // Статья
+                GrabbingResult.SourceDescription.Popularity = 1;        // TODO: Пока заглушка
 
+                GrabbingResult.SourceDescription.Image = "Просто пока ничего нет здесь в base24";   // TODO: Пока заглушка
 
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");    // Время окончания грабинга
+
                 grabResultsList.Add(GrabbingResult);        // Добавить статью в список
             }
 
             // Собрать мусор
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+            // GC.WaitForPendingFinalizers();
+            // GC.Collect();
+
+            return grr;
 
         }
 
