@@ -123,7 +123,7 @@ namespace qa_habrograb
 
                 // Добавить запрос на грабинг в очередь
                 log.Debug(String.Format("{0}: Добавление /grab запроса GrabRequest от Ядра в очередь.", Thread.CurrentThread.Name));
-                string result = QAHabroGrabProgram.rq.AddRequest(gr);
+                string result = QAHabroGrabProgram.req_q.AddRequest(gr);
                 if (result == "OK")
                 {
                     PositiveAnswer(result);     // положительный ответ Ядру

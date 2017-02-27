@@ -21,12 +21,13 @@ namespace qa_habrograb
     {
         // [STAThread]          // Однопоточное приложение
 
-        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
-        public static PingResponse ping_response = new PingResponse(true);                          // Ответ на /ping
-        public static GrabResponse grab_response = new GrabResponse(true);                          // Ответ на /grab
-        public static RequestsQueue rq;                                                             // Очередь запросов на граббинг
-        public static string grab_version = "1.0.0";                                                // Версия программы
-        public static string habr_logo_file_name = "logo_habr.base64";                              // Логотип источника новостей в base64
+        private static readonly ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));    // Логер
+        public static PingResponse ping_response = new PingResponse(true);                      // Ответ на /ping
+        public static GrabResponse grab_response = new GrabResponse(true);                      // Ответ на /grab
+        public static RequestsQueue req_q;                                      // Очередь запросов на граббинг
+        public static ResultsQueue res_q;                                       // Очеред результатов грабинга                    
+        public static string grab_version = "1.0.0";                            // Версия программы
+        public static string habr_logo_file_name = "logo_habr.base64";          // Логотип источника новостей в base64
 
 
         static void Main(string[] args)
@@ -47,9 +48,14 @@ namespace qa_habrograb
 
             
 
-            // Создать очередь запросов на граббинг
+            // Создать очередь запросов на грабинг
             log.Debug("Create the requests queue.");
-            rq = new RequestsQueue(Config.grabber.requests_queue_size);
+            req_q = new RequestsQueue(Config.grabber.requests_queue_size);
+
+            // Создать очередь результатов грабинга
+            log.Debug("Create the results queue.");
+            res_q = new ResultsQueue(Config.grabber.results_queue_size);
+
 
             // Принимать команды от Ядра в отдельном потоке
             Thread CommandReceiverThread = new Thread(delegate () { CommandReceiver(Config); });
@@ -66,7 +72,7 @@ namespace qa_habrograb
 
 
             // Опрос очереди результатов и отправка результатов Ядру в отдельном потоке
-            // TODO: !!!!!
+            // 
 
 
 
@@ -123,7 +129,7 @@ namespace qa_habrograb
         {
             GrabRequest gr_from_queue;
 
-            gr_from_queue = rq.GetRequest();        // Получить запрос из очереди
+            gr_from_queue = req_q.GetRequest();        // Получить запрос из очереди
 
             if (gr_from_queue == null)              // Если нет запросов в очереди
             {
