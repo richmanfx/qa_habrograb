@@ -6,6 +6,7 @@ using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,7 +71,7 @@ namespace qa_habrograb
             // Грабить статьи
             GrabResultsRequest GrResReq = ArticleGrabber(driver, GrabbingRequest, search_query, SaList, StartTime);
 
-            driver.Close();     // Браузер загрыть
+            driver.Close();     // Браузер закрыть
 
             return GrResReq;
         }
@@ -90,7 +91,7 @@ namespace qa_habrograb
             return search_query;
         }
 
-        /// Грабит статьи по ссылкам из списка пре-статей, помещает в список GrabResults
+        /// Грабит статьи по ссылкам из списка пре-статей (SmallArticle), помещает в список GrabResults
         private GrabResultsRequest ArticleGrabber(RemoteWebDriver driver, GrabRequest grabbingRequest, string searchQuery,
                                     List<SmallArticle> saList, string StartTime)
         {
@@ -128,9 +129,14 @@ namespace qa_habrograb
 
                 GrabbingResult.SourceDescription.Popularity = 1;        // TODO: Пока заглушка
 
-                GrabbingResult.SourceDescription.Image = "Просто пока ничего нет здесь в base24";   // TODO: Пока заглушка
+                // Получить изображение статьи
+                string image_url = driver.FindElementByXPath("//div[@class='content html_format']/div/img").GetAttribute("src");
+                WebClient web_client = new WebClient();
+                log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
+                byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
+                GrabbingResult.SourceDescription.Image = Convert.ToBase64String(image_file_as_byte);        // В base64
 
-                GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");    // Время окончания грабинга
+                GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга
 
                 grabResultsList.Add(GrabbingResult);        // Добавить статью в список
             }
