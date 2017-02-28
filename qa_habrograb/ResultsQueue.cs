@@ -43,23 +43,39 @@ namespace qa_habrograb
             return Result;
         }
 
-        /// Забирает из очереди результат
+        /// Считывает из очереди результат
         public GrabResultsRequest GetResult()
         {
             GrabResultsRequest Result;
             if (results_queue.Count == 0)
             {
-                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста.", Thread.CurrentThread.Name));
+                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста - читать нечего.", Thread.CurrentThread.Name));
                 Result = null;
             }
             else
             {
-                Result = results_queue.Dequeue();
-                log.Debug(String.Format("{1}: Изъят результат грабинга из очереди. Осталось результатов в очереди: {0} .", 
-                                        results_queue.Count, 
-                                        Thread.CurrentThread.Name));
+                //Result = results_queue.Dequeue();
+                Result = results_queue.Peek();
+                log.Debug(String.Format("{1}: Считан результат грабинга из очереди.", Thread.CurrentThread.Name));
             }
             return Result;
+        }
+
+
+        /// Удаляет из очереди результат
+        public void DeleteResult()
+        {
+            if (results_queue.Count == 0)
+            {
+                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста - удалять нечего.", Thread.CurrentThread.Name));
+            }
+            else
+            {
+                results_queue.Dequeue();
+                log.Debug(String.Format("{1}: Удалён результат грабинга из очереди. Осталось результатов в очереди: {0} .",
+                                        results_queue.Count,
+                                        Thread.CurrentThread.Name));
+            }
         }
     }
 }

@@ -68,7 +68,9 @@ namespace qa_habrograb
             {
                 log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" принят Ядром",
                                     Thread.CurrentThread.Name));
-                // TODO:  Правильно бы только сейчас удалить 'GrabResultsRequest' из выходной очереди, но мы его уже изъяли...
+
+                // Удалить 'GrabResultsRequest' из выходной очереди
+                QAHabroGrabProgram.res_q.DeleteResult();
             }
             else
             {
