@@ -134,7 +134,8 @@ namespace qa_habrograb
                 WebClient web_client = new WebClient();
                 log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
                 byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
-                GrabbingResult.SourceDescription.Image = Convert.ToBase64String(image_file_as_byte);        // В base64
+                  // В base64
+                GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);        
 
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга
 
