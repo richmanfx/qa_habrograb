@@ -152,7 +152,7 @@ namespace qa_habrograb
 
 
         /// Определение языка статьи - "ru" или "en"
-        private string LanguageIdentifier(string text)
+        public string LanguageIdentifier(string text)
         {
             string Result;
             int engCount = 0;
