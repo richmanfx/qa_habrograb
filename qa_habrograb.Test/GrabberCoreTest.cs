@@ -10,11 +10,8 @@ namespace qa_habrograb.Test
         public void LangIdent_RusText_ru()
         {
             // Подготовка
-            string russian_text = "Время подобно искусному управителю, непрестанно" +
-                                  "производящему новые таланты взамен исчезнувших.";
-
+            string russian_text = "Время подобно искусному управителю, непрестанно производящему новые таланты взамен исчезнувших.";
             string expected_result = "ru";
-
             GrabRequest gr = new GrabRequest();
             GrabConfig g_config = new GrabConfig();
             
@@ -24,20 +21,33 @@ namespace qa_habrograb.Test
 
             // Утверждение
             Assert.AreEqual(expected_result, actual_result);
+        }
 
+        [TestMethod]
+        public void LangIdentNegative_RusText_en()
+        {
+            // Arrange
+            string russian_text = "Время подобно искусному управителю, непрестанно производящему новые таланты взамен исчезнувших.";
+            string not_expected_result = "en";
+            GrabRequest gr = new GrabRequest();
+            GrabConfig g_config = new GrabConfig();
+
+            // Act
+            GrabberCore gc = new GrabberCore(gr, g_config);
+            string actual_result = gc.LanguageIdentifier(russian_text);
+
+            // Assert
+            Assert.AreNotEqual(not_expected_result, actual_result);
         }
 
         [TestMethod]
         public void LangIdent_EngText_en()
         {
             // Arrange
-            string english_text = "The great Breakthrough in your life comes when you" +
-                                  "realize it that you can learn anything you need to" +
-                                  "learn to accomplish any goal that you set for yourself." +
-                                  "This means there are no limits on what you can be, have or do.";
-
+            string english_text = "The great Breakthrough in your life comes when you realize it that you can learn anything you need to" +
+                                  "learn to accomplish any goal that you set for yourself. This means there are no limits on what you can" +
+                                  "be, have or do.";
             string expected_result = "en";
-
             GrabRequest gr = new GrabRequest();
             GrabConfig g_config = new GrabConfig();
 
@@ -49,5 +59,23 @@ namespace qa_habrograb.Test
             Assert.AreEqual(expected_result, actual_result);
         }
 
+        [TestMethod]
+        public void LangIdentNegative_EngText_ru()
+        {
+            // Arrange
+            string english_text = "The great Breakthrough in your life comes when you realize it that you can learn anything you need to" +
+                                  "learn to accomplish any goal that you set for yourself. This means there are no limits on what you can" +
+                                  "be, have or do.";
+            string not_expected_result = "ru";
+            GrabRequest gr = new GrabRequest();
+            GrabConfig g_config = new GrabConfig();
+
+            // Act
+            GrabberCore gc = new GrabberCore(gr, g_config);
+            string actual_result = gc.LanguageIdentifier(english_text);
+
+            // Assert
+            Assert.AreNotEqual(not_expected_result, actual_result);
+        }
     }
 }
