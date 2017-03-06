@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,64 +16,101 @@ namespace qa_habrograb
     {
         private static ILog log = LogManager.GetLogger(typeof(QAHabroGrabProgram));        // Логер
 
-        HttpListener listener;           // Слушатель сокета
+        TcpListener Listener;           // Слушатель сокета
 
-        /// Запускатель сервера
+        /// Конструктор - Запускатель сервера
         /// <param name="Port"></param>
         public GrabServer(int port)
         {
-            listener = new HttpListener();
-            listener.Prefixes.Add(String.Format("http://*:{0}/", port));    // Слушаем на указанном порту
-            listener.Start();       // Начинаем слушать
+            Listener = new TcpListener(IPAddress.Any, port);        // Слушать на указанном порту
+            Listener.Start();       // Начать слушать
 
-            // Принимаем новые соединения от клиентов
+            // Принимать новые соединения от клиентов
             for (;;)  // бесконечно
             {
-                HttpListenerContext context = listener.GetContext();    //Ожидание входящего запроса
-                HttpListenerRequest request = context.Request;          //Объект запроса
-                HttpListenerResponse response = context.Response;       //Объект ответа
+                TcpClient Client = Listener.AcceptTcpClient();                              // Принимать нового клиента
+                Thread Thread = new Thread(new ParameterizedThreadStart(ClientThread));     // Создать поток
+                Thread.Start(Client);                                                       // Запустить этот поток, передавая ему принятого клиента
+                log.Debug(String.Format("{0}: Принят запрос: {1}", Thread.CurrentThread.Name, Client.ToString()));
 
-                log.Debug(String.Format("{2}: {0} request is received: {1}", request.HttpMethod, request.Url, Thread.CurrentThread.Name));
+
+                // HttpListenerContext context = Listener.GetContext();    //Ожидание входящего запроса
+                // HttpListenerRequest request = context.Request;          //Объект запроса
+                // HttpListenerResponse response = context.Response;       //Объект ответа
+
+                // log.Debug(String.Format("{2}: {0} request is received: {1}", request.HttpMethod, request.Url, Thread.CurrentThread.Name));
 
                 // Обработать входящий запрос
-                SwitchingRequests(request, response);
+                // SwitchingRequests(request, response);
 
                 // Послать ответ
-                using (Stream stream = response.OutputStream) { }
+                // using (Stream stream = response.OutputStream) { }
             }
         } // end конструктора GrabServer
 
 
-        /// Парсер GET и POST запросов от сервера-ядра
-        private void SwitchingRequests(HttpListenerRequest request, HttpListenerResponse response)
+        /// Запускатель клиента
+        static void ClientThread(Object StateInfo)
         {
-            // string ping_template;
-            string responseString;
-            byte[] buffer;
+            // Просто создаем новый экземпляр класса Client и передаем ему приведенный к классу TcpClient объект StateInfo
+            new Client((TcpClient)StateInfo);
+        }
 
-            switch (request.HttpMethod)
+        // Обработчик клиента
+        class Client
+        {
+            // Конструктор. Принимает клиента от TcpListener
+            public Client(TcpClient IncomingClient)
             {
-                case "GET":
-                    HendlingGET(response, out responseString, out buffer);
-                    break;
+                string Request = "";                                // Запрос клиента
+                byte[] Buffer = new byte[1024];                     // Буфер для принятых данных
+                int Count;                                          // Количеств байт, принятых от клиента
 
-                case "POST":
-                    HendlingPOST(request, response, out responseString, out buffer);
-                    break;
+                // Читать из потока клиента, пока от него поступают данные
+                while ((Count = IncomingClient.GetStream().Read(Buffer, 0, Buffer.Length)) > 0)
+                {
+                    Request += Encoding.ASCII.GetString(Buffer, 0, Count);          // Преобразовать данные в строку и добавить к Request
+                    if (Request.IndexOf("\r\n\r\n") >= 0)  // Запрос должен заканчиваться последовательностью \r\n\r\n
+                    {
+                        log.Debug(String.Format("{0}: Запрос: {1}", Thread.CurrentThread.Name, Request));
+                        break;
+                    }
+                }
 
-                case "DELETE":
-                    HendlingDELETE(request, response, out responseString, out buffer);
-                    break;
-
-                default:
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    break;
+                // Обработать входящий запрос
+                SwitchingRequests(Request);
             }
-        } // end SwitchingRequests
 
+
+
+            /// Свитч запросов от сервера-ядра
+            private void SwitchingRequests(string Request)
+            {
+                string Method = Request.Split(' ')[0];
+
+                switch (Method)
+                {
+                    case "GET":
+                        HandlingGET(Request);
+                        break;
+                        /*
+                    case "POST":
+                        HandlingPOST(Request);
+                        break;
+
+                    case "DELETE":
+                        HandlingDELETE(Request);
+                        break;
+
+                    default:
+                        HandlingBadRequest(Request);
+                        break;*/
+                }
+            } // end SwitchingRequests
+        }
 
         /// Обработчик DELETE запроса для закрытия приложения
-        private void HendlingDELETE(HttpListenerRequest request, HttpListenerResponse response, 
+        private void HendlingDELETE(HttpListenerRequest request, HttpListenerResponse response,
                                     out string responseString, out byte[] buffer)
         {
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -86,7 +124,7 @@ namespace qa_habrograb
 
 
         /// Обработчик POST запроса от сервера-ядра
-        private void HendlingPOST(HttpListenerRequest request, HttpListenerResponse response, 
+        private void HendlingPOST(HttpListenerRequest request, HttpListenerResponse response,
                                   out string responseString, out byte[] buffer)
         {
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -94,7 +132,7 @@ namespace qa_habrograb
             if (incomingJson == null)
             {
                 string negative_response = "Данных в POST запросе нет.";
-                log.Debug(String.Format("{0}: {1}",Thread.CurrentThread.Name, negative_response));
+                log.Debug(String.Format("{0}: {1}", Thread.CurrentThread.Name, negative_response));
                 NegativeAnswer(negative_response);      // отрицательный ответ Ядру
             }
             else
@@ -138,21 +176,24 @@ namespace qa_habrograb
 
 
         /// Обработчик GET запроса от сервера-ядра
-        private static void HendlingGET(HttpListenerResponse response,
-                                       out string responseString,
-                                       out byte[] buffer)
+        private static void HandlingGET(string request)
         {
+
             DateTime currentDateTime = DateTime.Now;
-            response.StatusCode = (int)HttpStatusCode.OK;
+            TcpClient wc = new TcpClient();
 
+            
             // В ответ послать PingResponse
-            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
+            string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
 
+            
+            /*
             response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
             log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
             response.OutputStream.Write(buffer, 0, buffer.Length);
+            */
         }
 
 
@@ -186,14 +227,6 @@ namespace qa_habrograb
             QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
         }
 
-        /*
-        /// Верификация /grab запроса GrabRequest от Ядра - Json.NET Schema: http://www.newtonsoft.com/jsonschema
-        private void ValidateGrabRequest(string incomingJson)
-        {
-            
-        }
-        */
-
 
         /// Очистка данных запроса
         private string CleaningRequestData(HttpListenerRequest request)
@@ -220,7 +253,7 @@ namespace qa_habrograb
 
         /// Останавливаем работу сервера
         ~GrabServer()
-        { if (listener != null) listener.Stop(); } // если есть живой слушатель
+        { if (Listener != null) Listener.Stop(); } // если есть живой слушатель
 
-    }  // end class GrabServer
+    }   // end class GrabServer
 }
