@@ -72,26 +72,26 @@ namespace qa_habrograb
                     Request += Encoding.ASCII.GetString(Buffer, 0, Count);          // Преобразовать данные в строку и добавить к Request
                     if (Request.IndexOf("\r\n\r\n") >= 0)  // Запрос должен заканчиваться последовательностью \r\n\r\n
                     {
-                        log.Debug(String.Format("{0}: Запрос: {1}", Thread.CurrentThread.Name, Request));
+                        log.Debug(String.Format("{0}: Запрос: {1}", Thread.CurrentThread.Name, Request.Replace("\r\n", ", ")));
                         break;
                     }
                 }
 
                 // Обработать входящий запрос
-                SwitchingRequests(Request);
+                SwitchingRequests(Request, IncomingClient);
             }
 
 
 
             /// Свитч запросов от сервера-ядра
-            private void SwitchingRequests(string Request)
+            private void SwitchingRequests(string Request, TcpClient IncomingClient)
             {
                 string Method = Request.Split(' ')[0];
 
                 switch (Method)
                 {
                     case "GET":
-                        HandlingGET(Request);
+                        HandlingGET(Request, IncomingClient);
                         break;
                         /*
                     case "POST":
@@ -107,6 +107,9 @@ namespace qa_habrograb
                         break;*/
                 }
             } // end SwitchingRequests
+
+
+
         }
 
         /// Обработчик DELETE запроса для закрытия приложения
@@ -176,17 +179,24 @@ namespace qa_habrograb
 
 
         /// Обработчик GET запроса от сервера-ядра
-        private static void HandlingGET(string request)
+        private static void HandlingGET(string request, TcpClient IncomingClient)
         {
 
             DateTime currentDateTime = DateTime.Now;
-            TcpClient wc = new TcpClient();
+            TcpClient tc = new TcpClient();
 
             
             // В ответ послать PingResponse
             string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
-
-            
+            string contentType = "content-type: application/json";
+            UTF8Encoding encoding = new UTF8Encoding();
+            string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
+            byte[] headerBuffer = encoding.GetBytes(headers);
+            byte[] responseBuffer = encoding.GetBytes(responseString);
+            IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
+            IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
+            IncomingClient.Close();
+            log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
             /*
             response.ContentType = "content-type: application/json";
             buffer = Encoding.UTF8.GetBytes(responseString);
