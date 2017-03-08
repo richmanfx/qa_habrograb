@@ -97,37 +97,58 @@ namespace qa_habrograb
                     case "POST":
                         HandlingPOST(Request);
                         break;
-
+                        */
                     case "DELETE":
-                        HandlingDELETE(Request);
+                        HandlingDELETE(Request, IncomingClient);
                         break;
-
                     default:
-                        HandlingBadRequest(Request);
-                        break;*/
+                        // HandlingBadRequest(Request);
+                        break;
                 }
             } // end SwitchingRequests
 
 
+            /// Обработчик DELETE запроса для закрытия приложения
+            private void HandlingDELETE(string request, TcpClient IncomingClient)
+            {
 
-        }
+                PositiveAnswer("Bye!");     // положительный ответ Ядру
+                string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response);
+                string contentType = "content-type: application/json";
+                UTF8Encoding encoding = new UTF8Encoding();
+                string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
+                byte[] headerBuffer = encoding.GetBytes(headers);
+                byte[] responseBuffer = encoding.GetBytes(responseString);
+                log.Debug(String.Format("{1}: Send answer on DELETE request: {0}", responseString, Thread.CurrentThread.Name));
+                IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
+                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
+                IncomingClient.Close();
+                log.Debug("Работа Грабера закончена.");
+                Environment.Exit(0);
+            }
 
-        /// Обработчик DELETE запроса для закрытия приложения
-        private void HendlingDELETE(HttpListenerRequest request, HttpListenerResponse response,
-                                    out string responseString, out byte[] buffer)
-        {
-            response.StatusCode = (int)HttpStatusCode.OK;
 
-            PositiveAnswer("Bye!");     // положительный ответ Ядру
-
-            SendResponse(response, out responseString, out buffer);
-            log.Debug("Работа Грабера закончена.");
-            Environment.Exit(0);
+            /// Обработчик GET запроса от сервера-ядра
+            private void HandlingGET(string request, TcpClient IncomingClient)
+            {
+                // В ответ послать PingResponse
+                QAHabroGrabProgram.ping_response.error.Time = DateTime.Now.ToString("s");
+                string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
+                string contentType = "content-type: application/json";
+                UTF8Encoding encoding = new UTF8Encoding();
+                string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
+                byte[] headerBuffer = encoding.GetBytes(headers);
+                byte[] responseBuffer = encoding.GetBytes(responseString);
+                log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
+                IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
+                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
+                IncomingClient.Close();
+            }
         }
 
 
         /// Обработчик POST запроса от сервера-ядра
-        private void HendlingPOST(HttpListenerRequest request, HttpListenerResponse response,
+        private void HandlingPOST(HttpListenerRequest request, HttpListenerResponse response,
                                   out string responseString, out byte[] buffer)
         {
             response.StatusCode = (int)HttpStatusCode.OK;
@@ -140,9 +161,6 @@ namespace qa_habrograb
             }
             else
             {
-                // TODO: Верификация /grab запроса GrabRequest от Ядра - Json.NET Schema (платная???)
-                // ValidateGrabRequest(incomingJson);
-
                 // Десериализовать данные запроса в объект GrabRequest
                 GrabRequest gr = new GrabRequest();
                 try
@@ -176,36 +194,6 @@ namespace qa_habrograb
             }
             SendResponse(response, out responseString, out buffer);
         }
-
-
-        /// Обработчик GET запроса от сервера-ядра
-        private static void HandlingGET(string request, TcpClient IncomingClient)
-        {
-
-            DateTime currentDateTime = DateTime.Now;
-            TcpClient tc = new TcpClient();
-
-            
-            // В ответ послать PingResponse
-            string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
-            string contentType = "content-type: application/json";
-            UTF8Encoding encoding = new UTF8Encoding();
-            string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
-            byte[] headerBuffer = encoding.GetBytes(headers);
-            byte[] responseBuffer = encoding.GetBytes(responseString);
-            IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
-            IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
-            IncomingClient.Close();
-            log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
-            /*
-            response.ContentType = "content-type: application/json";
-            buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentLength64 = buffer.Length;
-            log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
-            response.OutputStream.Write(buffer, 0, buffer.Length);
-            */
-        }
-
 
         /// Сформировать положительный ответ Ядру
         private static void PositiveAnswer(string text)
