@@ -102,11 +102,22 @@ namespace qa_habrograb
                         HandlingDELETE(Request, IncomingClient);
                         break;
                     default:
-                        // HandlingBadRequest(Request);
+                        HandlingBadRequest(Request, IncomingClient);
                         break;
                 }
             } // end SwitchingRequests
 
+            /// Обработчик неверного типа запроса
+            private void HandlingBadRequest(string request, TcpClient IncomingClient)
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                string responseString = "HTTP/1.1 405 Not Allowed \nContent-Type: " +
+                                        "\nContent-Length: \n\n";
+                byte[] responseBuffer = encoding.GetBytes(responseString);
+                log.Debug(String.Format("{1}: Send answer on bad request: {0}", responseString, Thread.CurrentThread.Name));
+                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
+                IncomingClient.Close();
+            }
 
             /// Обработчик DELETE запроса для закрытия приложения
             private void HandlingDELETE(string request, TcpClient IncomingClient)
