@@ -25,7 +25,7 @@ namespace qa_habrograb
         public static GrabResponse grab_response = new GrabResponse(true);                      // Ответ на /grab
         public static RequestsQueue req_q;                                      // Очередь запросов на граббинг
         public static ResultsQueue res_q;                                       // Очеред результатов грабинга                    
-        public static string grab_version = "1.0.2";                            // Версия программы
+        public static string grab_version = "1.0.5";                            // Версия программы
         public static string habr_logo_file_name = "logo_habr.base64";          // Логотип источника новостей в base64
 
 
