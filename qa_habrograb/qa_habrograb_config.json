@@ -5,7 +5,9 @@
     //"browser_size": "1800x800"
     "port": 7777,
     "requests_queue_size": 16,
-    "results_queue_size": 64
+    "results_queue_size": 64,
+    "requests_queue_polling_period": 11,
+    "results_queue_polling_period": 43
   },
 
   "core_server": {

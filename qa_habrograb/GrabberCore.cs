@@ -136,16 +136,24 @@ namespace qa_habrograb
                     image_url = driver.FindElementByXPath("//div[@class='content html_format']/div/img").GetAttribute("src");
                 } catch (NoSuchElementException)
                 {
-                    log.Debug(String.Format("{0}: Картинка не нашлась: \"{1}\"", Thread.CurrentThread.Name, image_url));
+                    log.Debug(String.Format("{0}: Картинка не нашлась на странице: \"{1}\"", 
+                                            Thread.CurrentThread.Name, 
+                                            small_article.TitleLink));
                 }
 
                 if (image_url != "")
                 {
                     WebClient web_client = new WebClient();
                     log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
-                    byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
-                                                                                                                // В base64
-                    GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);
+                    try
+                    {
+                        byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
+                                                                                                                    // В base64
+                        GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);
+                    } catch (System.Net.WebException)
+                    {
+                        log.Debug(String.Format("{0}: Картинка не скачивается: \"{1}\"", Thread.CurrentThread.Name, image_url));
+                    }
                 }
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга
 

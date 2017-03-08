@@ -49,14 +49,14 @@ namespace qa_habrograb
             GrabResultsRequest Result;
             if (results_queue.Count == 0)
             {
-                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста - читать нечего.", Thread.CurrentThread.Name));
+                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста.", Thread.CurrentThread.Name));
                 Result = null;
             }
             else
             {
                 //Result = results_queue.Dequeue();
                 Result = results_queue.Peek();
-                log.Debug(String.Format("{1}: Считан результат грабинга из очереди.", Thread.CurrentThread.Name));
+                log.Debug(String.Format("{0}: Считан результат грабинга из очереди.", Thread.CurrentThread.Name));
             }
             return Result;
         }
@@ -67,7 +67,7 @@ namespace qa_habrograb
         {
             if (results_queue.Count == 0)
             {
-                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста - удалять нечего.", Thread.CurrentThread.Name));
+                log.Debug(String.Format("{0}: Очередь результатов грабинга пуста.", Thread.CurrentThread.Name));
             }
             else
             {

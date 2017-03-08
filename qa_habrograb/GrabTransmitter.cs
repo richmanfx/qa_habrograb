@@ -31,11 +31,17 @@ namespace qa_habrograb
             RequestToCore.ContentLength = bytes.Length;
 
             // Сформировать тело запроса
-            using (Stream requestStream = RequestToCore.GetRequestStream())
+            try
             {
-                requestStream.Write(bytes, 0, encoding.GetByteCount(PostedString));
+                using (Stream requestStream = RequestToCore.GetRequestStream())
+                {
+                    requestStream.Write(bytes, 0, encoding.GetByteCount(PostedString));
+                }
             }
-
+            catch (WebException)
+            {
+                log.Debug(String.Format("{0}: Ошибка соединения с сервером-Ядром.", Thread.CurrentThread.Name));
+            }
 
             // Отправить запрос Ядру и получить ответ
             log.Debug(String.Format("{0}: Отправка результата \"GrabResultsRequest\" Ядру.", Thread.CurrentThread.Name));

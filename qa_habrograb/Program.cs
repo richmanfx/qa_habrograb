@@ -84,20 +84,17 @@ namespace qa_habrograb
         {
             for (;;)
             {
-                int polling_frequency = 43;              // Время в секундах между опросами очереди результатов
                 GrabResultsRequest grr_from_result_queue = res_q.GetResult();     // Получить запрос из очереди
                 if (grr_from_result_queue != null)
                 {
                     // Отправить результат Ядру
                     log.Debug(String.Format("{0}: Отправка результата грабинга Ядру.",
                                                 Thread.CurrentThread.Name));
-
-                    /// !!!!!  TODO!!!!! 
                     GrabTransmitter gt = new GrabTransmitter(config, grr_from_result_queue);
                     
                 }
-
-                Thread.Sleep(polling_frequency * 1000);     // В миллисекунды
+                // Засыпание между опросами очереди результатов
+                Thread.Sleep(config.grabber.results_queue_polling_period * 1000);     // В миллисекунды
             }
         }
 
@@ -107,7 +104,6 @@ namespace qa_habrograb
             string result;
             for (;;)
             {
-                int polling_frequency = 11;         // Время в секундах между опросами очереди запросов на грабинг
                 GrabResultsRequest GRR = QueuePolling(config);
                 if (GRR != null)
                 {
@@ -115,15 +111,15 @@ namespace qa_habrograb
                     result = res_q.AddResult(GRR);
                     if (result != "OK")
                     {
-                        // TODO: Заполнить состояние грабера - всё не ОК в ErrorInfo.
+                        /// TODO: Заполнить состояние грабера - всё не ОК в ErrorInfo.
 
                         log.Debug(String.Format("{0}: Результат грабинга НЕ размещён в очереди. {1}",
                                                 Thread.CurrentThread.Name,
                                                 result));
                     }
                 }
-
-                Thread.Sleep(polling_frequency * 1000);     // В миллисекунды
+                // Засыпание между опросами очереди запросов на грабинг
+                Thread.Sleep(config.grabber.requests_queue_polling_period * 1000);     // В миллисекунды
             }
         }
 
