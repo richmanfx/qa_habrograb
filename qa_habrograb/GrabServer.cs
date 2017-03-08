@@ -23,7 +23,14 @@ namespace qa_habrograb
         public GrabServer(int port)
         {
             Listener = new TcpListener(IPAddress.Any, port);        // Слушать на указанном порту
-            Listener.Start();       // Начать слушать
+            try
+            {
+                Listener.Start();       // Начать слушать
+            } catch (System.Net.Sockets.SocketException) {
+                log.Debug(String.Format("{0}: Сокет недоступен. Запускается второй экземпляр программы?", Thread.CurrentThread.Name));
+                Environment.Exit(0);
+            }
+            
 
             // Принимать новые соединения от клиентов
             for (;;)  // бесконечно
@@ -32,19 +39,6 @@ namespace qa_habrograb
                 Thread Thread = new Thread(new ParameterizedThreadStart(ClientThread));     // Создать поток
                 Thread.Start(Client);                                                       // Запустить этот поток, передавая ему принятого клиента
                 log.Debug(String.Format("{0}: Принят запрос: {1}", Thread.CurrentThread.Name, Client.ToString()));
-
-
-                // HttpListenerContext context = Listener.GetContext();    //Ожидание входящего запроса
-                // HttpListenerRequest request = context.Request;          //Объект запроса
-                // HttpListenerResponse response = context.Response;       //Объект ответа
-
-                // log.Debug(String.Format("{2}: {0} request is received: {1}", request.HttpMethod, request.Url, Thread.CurrentThread.Name));
-
-                // Обработать входящий запрос
-                // SwitchingRequests(request, response);
-
-                // Послать ответ
-                // using (Stream stream = response.OutputStream) { }
             }
         } // end конструктора GrabServer
 
@@ -91,24 +85,23 @@ namespace qa_habrograb
                 switch (Method)
                 {
                     case "GET":
-                        HandlingGET(Request, IncomingClient);
+                        HandlingGET(IncomingClient);
                         break;
-                        /*
                     case "POST":
-                        HandlingPOST(Request);
+                        HandlingPOST(Request, IncomingClient);
                         break;
-                        */
                     case "DELETE":
-                        HandlingDELETE(Request, IncomingClient);
+                        HandlingDELETE(IncomingClient);
                         break;
                     default:
-                        HandlingBadRequest(Request, IncomingClient);
+                        HandlingBadRequest(IncomingClient);
                         break;
                 }
             } // end SwitchingRequests
 
+
             /// Обработчик неверного типа запроса
-            private void HandlingBadRequest(string request, TcpClient IncomingClient)
+            private void HandlingBadRequest(TcpClient IncomingClient)
             {
                 UTF8Encoding encoding = new UTF8Encoding();
                 string responseString = "HTTP/1.1 405 Not Allowed \nContent-Type: " +
@@ -119,59 +112,33 @@ namespace qa_habrograb
                 IncomingClient.Close();
             }
 
-            /// Обработчик DELETE запроса для закрытия приложения
-            private void HandlingDELETE(string request, TcpClient IncomingClient)
-            {
 
+            /// Обработчик DELETE запроса для закрытия приложения
+            private void HandlingDELETE(TcpClient IncomingClient)
+            {
                 PositiveAnswer("Bye!");     // положительный ответ Ядру
                 string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response);
-                string contentType = "content-type: application/json";
-                UTF8Encoding encoding = new UTF8Encoding();
-                string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
-                byte[] headerBuffer = encoding.GetBytes(headers);
-                byte[] responseBuffer = encoding.GetBytes(responseString);
-                log.Debug(String.Format("{1}: Send answer on DELETE request: {0}", responseString, Thread.CurrentThread.Name));
-                IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
-                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
-                IncomingClient.Close();
+                SendResponse(IncomingClient, responseString);
                 log.Debug("Работа Грабера закончена.");
                 Environment.Exit(0);
             }
 
 
             /// Обработчик GET запроса от сервера-ядра
-            private void HandlingGET(string request, TcpClient IncomingClient)
+            private void HandlingGET(TcpClient IncomingClient)
             {
-                // В ответ послать PingResponse
                 QAHabroGrabProgram.ping_response.error.Time = DateTime.Now.ToString("s");
-                string responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response);
-                string contentType = "content-type: application/json";
-                UTF8Encoding encoding = new UTF8Encoding();
-                string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
-                byte[] headerBuffer = encoding.GetBytes(headers);
-                byte[] responseBuffer = encoding.GetBytes(responseString);
-                log.Debug(String.Format("{1}: Send answer on GET request: {0}", responseString, Thread.CurrentThread.Name));
-                IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
-                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
-                IncomingClient.Close();
+                // В ответ послать PingResponse
+                SendResponse(IncomingClient, JsonConvert.SerializeObject(QAHabroGrabProgram.ping_response));
             }
-        }
 
 
-        /// Обработчик POST запроса от сервера-ядра
-        private void HandlingPOST(HttpListenerRequest request, HttpListenerResponse response,
-                                  out string responseString, out byte[] buffer)
-        {
-            response.StatusCode = (int)HttpStatusCode.OK;
-            string incomingJson = CleaningRequestData(request);     // Очистка данных запроса
-            if (incomingJson == null)
+            /// Обработчик POST запроса от сервера-ядра
+            private void HandlingPOST(string request, TcpClient IncomingClient)
             {
-                string negative_response = "Данных в POST запросе нет.";
-                log.Debug(String.Format("{0}: {1}", Thread.CurrentThread.Name, negative_response));
-                NegativeAnswer(negative_response);      // отрицательный ответ Ядру
-            }
-            else
-            {
+                // Выделить JSON
+                string incomingJson = CleaningRequestData(request);
+
                 // Десериализовать данные запроса в объект GrabRequest
                 GrabRequest gr = new GrabRequest();
                 try
@@ -180,33 +147,56 @@ namespace qa_habrograb
                 }
                 catch (Exception ex)
                 {
-                    QAHabroGrabProgram.grab_response.Result = false;
-                    QAHabroGrabProgram.grab_response.Error.Text = "Ошибка в запросе GrabRequest от Ядра.";
-                    QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
-                    QAHabroGrabProgram.grab_response.Error.Exception.StackTrace.Add(ex.StackTrace);
-                    QAHabroGrabProgram.grab_response.Error.Exception.Message = ex.Message;
-                    QAHabroGrabProgram.grab_response.Error.Exception.ClassName = ex.Source;
+                    // Заполнить GrabResponse при неверном JSON
+                    NegativeAnswer("Ошибка в JSON запросе GrabRequest от Ядра.", ex);
 
-                    SendResponse(response, out responseString, out buffer);
+                    // Послать ответ Ядру
+                    SendResponse(IncomingClient, JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response));
+
+                    // Вернуться ничего не добавляя в очередь запросов на грабинг
                     return;
                 }
 
                 // Добавить запрос на грабинг в очередь
                 log.Debug(String.Format("{0}: Добавление /grab запроса GrabRequest от Ядра в очередь.", Thread.CurrentThread.Name));
                 string result = QAHabroGrabProgram.req_q.AddRequest(gr);
+
                 if (result == "OK")
-                {
-                    PositiveAnswer(result);     // положительный ответ Ядру
-                }
+                    PositiveAnswer(result);             // положительный ответ Ядру при удачном добавлении в очередь
                 else
-                {
-                    NegativeAnswer(result);     // отрицательный ответ Ядру
-                }
+                    NegativeAnswer(result, null);       // отрицательный ответ Ядру при неудачном добавлении в очередь
+
+                // Послать ответ Ядру
+                SendResponse(IncomingClient, JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response));
             }
-            SendResponse(response, out responseString, out buffer);
+
+            /// Отправление ответа на запрос
+            private static void SendResponse(TcpClient IncomingClient, string responseString)
+            {
+                string contentType = "content-type: application/json";
+                UTF8Encoding encoding = new UTF8Encoding();
+                string headers = "HTTP/1.1 200 OK\nContent-Type: " + contentType + "\nContent-Length: " + responseString.Length + "\n\n";
+                byte[] headerBuffer = encoding.GetBytes(headers);
+                byte[] responseBuffer = encoding.GetBytes(responseString);
+                log.Debug(String.Format("{1}: Send answer on request: {0}", responseString, Thread.CurrentThread.Name));
+                IncomingClient.GetStream().Write(headerBuffer, 0, headerBuffer.Length);
+                IncomingClient.GetStream().Write(responseBuffer, 0, responseBuffer.Length);
+                IncomingClient.Close();
+            }
+
+            /// Очистка данных запроса
+            private string CleaningRequestData(string request)
+            {
+                string[] lines = request.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                int counter = lines.Length;
+                string clearRequestJson = lines[counter - 1];
+                log.Debug(String.Format("{1}: Body: {0}", clearRequestJson, Thread.CurrentThread.Name));
+                return clearRequestJson;
+            }
         }
 
-        /// Сформировать положительный ответ Ядру
+
+        /// Формирование позитивного ответа Ядру
         private static void PositiveAnswer(string text)
         {
             QAHabroGrabProgram.grab_response.Result = true;
@@ -217,50 +207,24 @@ namespace qa_habrograb
             QAHabroGrabProgram.grab_response.Error.Exception.ClassName = "";
         }
 
-        /// Отправление ответа на запрос
-        private static void SendResponse(HttpListenerResponse response, out string responseString, out byte[] buffer)
-        {
-            responseString = JsonConvert.SerializeObject(QAHabroGrabProgram.grab_response);
-            response.ContentType = "content-type: application/json";
-            buffer = Encoding.UTF8.GetBytes(responseString);
-            response.ContentLength64 = buffer.Length;
-            log.Debug(String.Format("{1}: Send answer: {0}.", responseString, Thread.CurrentThread.Name));
-            response.OutputStream.Write(buffer, 0, buffer.Length);
-        }
 
-        /// Формирует негативный ответ Ядру
-        private static void NegativeAnswer(string error_text)
+        /// Формирование негативного ответа Ядру
+        private static void NegativeAnswer(string error_text, Exception ex)
         {
             QAHabroGrabProgram.grab_response.Result = false;
             QAHabroGrabProgram.grab_response.Error.Text = error_text;
             QAHabroGrabProgram.grab_response.Error.Time = DateTime.Now.ToString("s");
+
+            if (ex != null)
+            {
+                QAHabroGrabProgram.grab_response.Error.Exception.StackTrace.Add(ex.StackTrace);
+                QAHabroGrabProgram.grab_response.Error.Exception.Message = ex.Message;
+                QAHabroGrabProgram.grab_response.Error.Exception.ClassName = ex.Source;
+            }
         }
 
 
-        /// Очистка данных запроса
-        private string CleaningRequestData(HttpListenerRequest request)
-        {
-            string clearRequestJson;
-            Stream inputStream = request.InputStream;
-            StreamReader reader = new StreamReader(inputStream, request.ContentEncoding);
-
-            // Есть данные от клиента?
-            if (!request.HasEntityBody)
-            {
-                clearRequestJson = null;
-            }
-            else
-            {
-                string requestBody = reader.ReadToEnd().Replace("\n", "").Trim();   // Убрать переводы строк, начальные и конечные пробелы
-                clearRequestJson = Regex.Replace(requestBody, "[ ]+", " ");         // Убрать повторяющиеся пробелы
-                log.Debug(String.Format("{1}: Body: {0}", clearRequestJson, Thread.CurrentThread.Name));
-            }
-            inputStream.Close();
-            reader.Close();
-            return clearRequestJson;
-        }
-
-        /// Останавливаем работу сервера
+        /// Остановка работы сервера
         ~GrabServer()
         { if (Listener != null) Listener.Stop(); } // если есть живой слушатель
 

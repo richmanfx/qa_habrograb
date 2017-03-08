@@ -130,13 +130,23 @@ namespace qa_habrograb
                 GrabbingResult.SourceDescription.Popularity = 1;        // TODO: Пока заглушка
 
                 // Получить изображение статьи
-                string image_url = driver.FindElementByXPath("//div[@class='content html_format']/div/img").GetAttribute("src");
-                WebClient web_client = new WebClient();
-                log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
-                byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
-                  // В base64
-                GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);        
+                string image_url = "";
+                try
+                {
+                    image_url = driver.FindElementByXPath("//div[@class='content html_format']/div/img").GetAttribute("src");
+                } catch (NoSuchElementException)
+                {
+                    log.Debug(String.Format("{0}: Картинка не нашлась: \"{1}\"", Thread.CurrentThread.Name, image_url));
+                }
 
+                if (image_url != "")
+                {
+                    WebClient web_client = new WebClient();
+                    log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
+                    byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
+                                                                                                                // В base64
+                    GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);
+                }
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга
 
                 grabResultsList.Add(GrabbingResult);        // Добавить статью в список
