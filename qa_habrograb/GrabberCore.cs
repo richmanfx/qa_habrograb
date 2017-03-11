@@ -133,8 +133,9 @@ namespace qa_habrograb
                 string image_url = "";
                 try
                 {
-                    image_url = driver.FindElementByXPath("//div[@class='content html_format']/div/img").GetAttribute("src");
-                } catch (NoSuchElementException)
+                    image_url = driver.FindElementByXPath("//div[@class='content html_format']//img[1]").GetAttribute("src");
+                }
+                catch (NoSuchElementException)
                 {
                     log.Debug(String.Format("{0}: Картинка не нашлась на странице: \"{1}\"", 
                                             Thread.CurrentThread.Name, 
@@ -144,15 +145,24 @@ namespace qa_habrograb
                 if (image_url != "")
                 {
                     WebClient web_client = new WebClient();
-                    log.Debug(String.Format("{0}: Downloading Image from \"{1}\" .......\n\"", Thread.CurrentThread.Name, image_url));
+                    log.Debug(String.Format("{0}: Downloading Image from \"{1}\"", Thread.CurrentThread.Name, image_url));
                     try
                     {
-                        byte[] image_file_as_byte = web_client.DownloadData(image_url);                             // Загрузить как массив байт
-                                                                                                                    // В base64
-                        GrabbingResult.SourceDescription.Image = "data:image/jpeg;base64," + Convert.ToBase64String(image_file_as_byte);
+                        // Загрузить как массив байт
+                        byte[] image_file_as_byte = web_client.DownloadData(image_url);
+
+                        // Определить формат файла изображения
+                        byte[] image_file_as_byte_16 = new Byte[16];        // 16 первый байт файла
+                        for (int i=0; i<16; i++)
+                            image_file_as_byte_16[i] = image_file_as_byte[i];
+                        string image_mime_type = ImagesMimeType.GetMimeType(image_file_as_byte_16);
+                        log.Debug(String.Format("{0}: Определился Mime-Type изображения: \"{1}\" .", Thread.CurrentThread.Name, image_mime_type));
+
+                        // В base64                                                                                           
+                        GrabbingResult.SourceDescription.Image = "data:" + image_mime_type + ";base64," + Convert.ToBase64String(image_file_as_byte);
                     } catch (System.Net.WebException)
                     {
-                        log.Debug(String.Format("{0}: Картинка не скачивается: \"{1}\"", Thread.CurrentThread.Name, image_url));
+                        log.Debug(String.Format("{0}: Изображение получить не удалось: \"{1}\"", Thread.CurrentThread.Name, image_url));
                     }
                 }
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга

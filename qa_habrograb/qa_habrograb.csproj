@@ -76,6 +76,7 @@
     <Compile Include="GrabResultsRequest.cs" />
     <Compile Include="GrabResultsResponse.cs" />
     <Compile Include="GrabTransmitter.cs" />
+    <Compile Include="ImagesMimeType.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PingResponse.cs" />
     <Compile Include="GrabServer.cs" />
