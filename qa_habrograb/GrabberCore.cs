@@ -121,13 +121,13 @@ namespace qa_habrograb
                 GrabbingResult.SourceDescription.Title = driver.FindElementByXPath("//div[@class='post__header']/h1/span").Text;
 
                 int annotationSize = 800;       // Количество символов для аннотации
-                string article = driver.FindElementByXPath("//div[@class='content html_format']").Text;
+                string article = driver.FindElementByXPath("//div[@class='content html_format']").Text;     // Вся статья
 
-                GrabbingResult.SourceDescription.Annotation = article.Remove(annotationSize);
+                GrabbingResult.SourceDescription.Annotation = article.Remove(annotationSize);   // Аннотация
 
                 GrabbingResult.SourceDescription.Language = LanguageIdentifier(article);      // Определение языка статьи - "ru" или "en"
 
-                GrabbingResult.SourceDescription.Popularity = 1;        // TODO: Пока заглушка
+                GrabbingResult.SourceDescription.Popularity = RatingCalculation(driver);        // Популярность (рейтинг) статьи
 
                 // Получить изображение статьи
                 string image_url = "";
@@ -158,7 +158,7 @@ namespace qa_habrograb
                         string image_mime_type = ImagesMimeType.GetMimeType(image_file_as_byte_16);
                         log.Debug(String.Format("{0}: Определился Mime-Type изображения: \"{1}\" .", Thread.CurrentThread.Name, image_mime_type));
 
-                        // В base64                                                                                           
+                        // В base64 закодировать
                         GrabbingResult.SourceDescription.Image = "data:" + image_mime_type + ";base64," + Convert.ToBase64String(image_file_as_byte);
                     } catch (System.Net.WebException)
                     {
@@ -176,6 +176,129 @@ namespace qa_habrograb
 
             return grr;
 
+        }
+
+        /// Расчёт популярности (рейтинга) статьи
+        private int RatingCalculation(RemoteWebDriver driver)
+        {
+            // Общий рейтинг
+            string rating = "";
+            try
+            {
+                rating = driver
+                    .FindElementByXPath("//span[contains(@class,'voting-wjt__counter-score js-score') and contains(@title,'Общий рейтинг')]")
+                    .Text;
+            }
+            catch (Exception)
+            {
+                log.Debug(String.Format("{0}: Не найдено значение Общего рейтинга страницы.", Thread.CurrentThread.Name));
+            }
+            int digitRating = StringToDigit(rating);
+
+            // Количество просмотров
+            string viewsNumber = "";
+            try
+            {
+                viewsNumber = driver
+                    .FindElementByXPath("//div[contains(@class,'views-count_post') and contains(@title,'Просмотры публикации')]")
+                    .Text;
+            }
+            catch (Exception)
+            {
+                log.Debug(String.Format("{0}: Не найдено значение Количества просмотров страницы.", Thread.CurrentThread.Name));
+            }
+            int digitViewsNumber = StringToDigit(viewsNumber);
+
+            // Количество добавлений в избранное
+            string favouritesAdding = "";
+            try
+            {
+                favouritesAdding = driver
+                    .FindElementByXPath("//span[contains(@title,'добавивших публикацию в избранное')]")
+                    .Text;
+            }
+            catch (Exception)
+            {
+                log.Debug(String.Format("{0}: Не найдено значение Количества добавлений в избранное.", Thread.CurrentThread.Name));
+            }
+            int digitFavouritesAddingr = StringToDigit(favouritesAdding);
+
+
+            // Основной расчёт популярности
+            double ratingWorth = 1.0;        // Вес, важность
+            double viewsNumberWorth = 0.001;
+            double favouritesAddingWorth = 2.0;
+
+            double popularity = ratingWorth * digitRating + 
+                                viewsNumberWorth * digitViewsNumber + 
+                                favouritesAddingWorth * digitFavouritesAddingr;
+
+            int intPopularity = Convert.ToInt32(popularity);
+
+            log.Debug(String.Format("{0}: Популярность страницы: {1}", Thread.CurrentThread.Name, intPopularity));
+
+            return intPopularity;
+        }
+
+
+        // TODO: Тесты написать!
+        /// Преобразовывает строки в знаковый int32
+        private static int StringToDigit(string inputString)
+        {
+            int Digit = 0;
+
+            if (!(inputString.Contains('k') || inputString.Contains('m') || inputString.Contains(',')))
+            {
+                try
+                {
+                    Digit = int.Parse(inputString);
+                    log.Debug(String.Format("{0}: Cтроковое значение \"{1}\" преобразовано в число \"{2}\".",
+                        Thread.CurrentThread.Name, inputString, Digit));
+                }
+                catch (Exception)
+                {
+                    log.Error(String.Format("{0}: Не удалось преобразовать строковое значение \"{1}\" в число.",
+                        Thread.CurrentThread.Name,
+                        inputString));
+                }
+            }
+            else
+            {
+                // Определить множитель
+                int multiplier;
+                if (inputString.Contains('k'))
+                    multiplier = 1000;
+                else if (inputString.Contains('m'))
+                    multiplier = 1000000;
+                else
+                    multiplier = 1;
+
+                // Отсечь буквенный множитель в конце строки
+                string choppedInputString = inputString.Substring(0, inputString.Length - 1);
+
+                // Разбить на тысячные порядки
+                // TODO: Пока не нашёл с двумя запятыми - в будущем доделать.
+
+                // Собрать результат
+                try
+                {
+                    double doubleDigit = double.Parse(choppedInputString);
+                    log.Debug(String.Format("{0}: Промежуточное значение: Cтроковое значение \"{1}\" преобразовано в число \"{2}\".",
+                        Thread.CurrentThread.Name, choppedInputString, doubleDigit));
+
+                    Digit = Convert.ToInt32(doubleDigit * multiplier);
+                    log.Debug(String.Format("{0}: Cтроковое значение \"{1}\" преобразовано в число \"{2}\".",
+                        Thread.CurrentThread.Name, inputString, Digit));
+                }
+                catch (Exception)
+                {
+                    log.Error(String.Format("{0}: Не удалось преобразовать строковое значение \"{1}\" в число.",
+                        Thread.CurrentThread.Name,
+                        inputString));
+                }
+            }
+
+            return Digit;
         }
 
 
@@ -203,7 +326,7 @@ namespace qa_habrograb
         }
 
 
-        /// Выбирает пре-статьи по требуемому пермоду дат
+        /// Выбирает пре-статьи по требуемому периоду дат
         private void GetSmallArticleInTrueDate(DateTime from_date, DateTime to_date, RemoteWebDriver driver, List<SmallArticle> sa_list)
         {
             do

@@ -45,53 +45,66 @@ namespace qa_habrograb
 
             // Отправить запрос Ядру и получить ответ
             log.Debug(String.Format("{0}: Отправка результата \"GrabResultsRequest\" Ядру.", Thread.CurrentThread.Name));
-            HttpWebResponse ResponseFromCore = (HttpWebResponse)RequestToCore.GetResponse();
-
-            string DataFromCore;        // Ответ от Ядра
-            using (StreamReader reader = new StreamReader(ResponseFromCore.GetResponseStream(), Encoding.UTF8))
-            {
-                DataFromCore = reader.ReadToEnd();
-            }
-            log.Debug(String.Format("{0}: От Ядра получен \"GrabResultsResponse\": {1}", 
-                                    Thread.CurrentThread.Name,
-                                    DataFromCore));
-
-            // Анализ ответа 'GrabResultsResponse' от ядра
-            // Десериализовать данные ответа в объект GrabResultsResponse
-            GrabResultsResponse GrabResResp = new GrabResultsResponse();
+            HttpWebResponse ResponseFromCore = null;
             try
             {
-                GrabResResp = JsonConvert.DeserializeObject<GrabResultsResponse>(DataFromCore);
-            } catch (Exception ex)
+                ResponseFromCore = (HttpWebResponse)RequestToCore.GetResponse();
+            }
+            catch (Exception)
             {
-                log.Debug(String.Format("{0}: Ответ \"GrabResultsResponse\" от Ядра имеет неверную структуру:\n{1}",
+                log.Debug(String.Format("{0}: Не удалась отправка результата Ядру.", Thread.CurrentThread.Name));
+
+            }
+
+            if (ResponseFromCore != null)
+            {
+                string DataFromCore;        // Ответ от Ядра
+                using (StreamReader reader = new StreamReader(ResponseFromCore.GetResponseStream(), Encoding.UTF8))
+                {
+                    DataFromCore = reader.ReadToEnd();
+                }
+                log.Debug(String.Format("{0}: От Ядра получен \"GrabResultsResponse\": {1}",
                                         Thread.CurrentThread.Name,
-                                        ex));
-            }
+                                        DataFromCore));
 
-            // Если отправленный результат принят
-            if (GrabResResp.Result)
-            {
-                log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" принят Ядром",
-                                    Thread.CurrentThread.Name));
+                // Анализ ответа 'GrabResultsResponse' от ядра
+                // Десериализовать данные ответа в объект GrabResultsResponse
+                GrabResultsResponse GrabResResp = new GrabResultsResponse();
+                try
+                {
+                    GrabResResp = JsonConvert.DeserializeObject<GrabResultsResponse>(DataFromCore);
+                }
+                catch (Exception ex)
+                {
+                    log.Debug(String.Format("{0}: Ответ \"GrabResultsResponse\" от Ядра имеет неверную структуру:\n{1}",
+                                            Thread.CurrentThread.Name,
+                                            ex));
+                }
 
-                // Удалить 'GrabResultsRequest' из выходной очереди
-                QAHabroGrabProgram.res_q.DeleteResult();
-            }
-            else
-            {
-                log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" Ядром НЕ принят:\n" +
-                                        "Error.Time: {1}\n" +
-                                        "Error.Text: {2}\n" +
-                                        "Error.Exception.Message: {3}\n" +
-                                        "Error.Exception.ClassName: {4}\n" +
-                                        "StackTrace: {5}\n",
-                                    Thread.CurrentThread.Name,
-                                    GrabResResp.Error.Time,
-                                    GrabResResp.Error.Text,
-                                    GrabResResp.Error.Exception.Message,
-                                    GrabResResp.Error.Exception.ClassName,
-                                    GrabResResp.Error.Exception.StackTrace));
+                // Если отправленный результат принят
+                if (GrabResResp.Result)
+                {
+                    log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" принят Ядром",
+                                        Thread.CurrentThread.Name));
+
+                    // Удалить 'GrabResultsRequest' из выходной очереди
+                    QAHabroGrabProgram.res_q.DeleteResult();
+                }
+                else
+                {
+                    log.Debug(String.Format("{0}: Результат \"GrabResultsRequest\" Ядром НЕ принят:\n" +
+                                            "Error.Time: {1}\n" +
+                                            "Error.Text: {2}\n" +
+                                            "Error.Exception.Message: {3}\n" +
+                                            "Error.Exception.ClassName: {4}\n" +
+                                            "StackTrace: {5}\n",
+                                        Thread.CurrentThread.Name,
+                                        GrabResResp.Error.Time,
+                                        GrabResResp.Error.Text,
+                                        GrabResResp.Error.Exception.Message,
+                                        GrabResResp.Error.Exception.ClassName,
+                                        GrabResResp.Error.Exception.StackTrace));
+                }
             }
         }
         
