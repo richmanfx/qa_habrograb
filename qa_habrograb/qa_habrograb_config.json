@@ -11,9 +11,9 @@
   },
 
   "core_server": {
-    "domain_name": "192.168.1.7",
-    "address": "192.168.1.7",
-    "port": 9999
+    "domain_name": "localhost",
+    "address": "127.0.0.1",
+    "port": 3000
   },
 
   "author": {
