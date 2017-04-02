@@ -6,6 +6,7 @@ namespace qa_habrograb.Test
     [TestClass]
     public class GrabberCoreTest
     {
+        ///*****  LangIdent  *****////
         [TestMethod]
         public void LangIdent_RusText_ru()
         {
@@ -76,6 +77,105 @@ namespace qa_habrograb.Test
 
             // Assert
             Assert.AreNotEqual(not_expected_result, actual_result);
+        }
+
+        ///*****  StringToDigit  *****////
+        [TestMethod]
+        public void StringToDigitPositive_string0_0()
+        {
+            // Arrange
+            string input_string = "0";
+            int expected_result = 0;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_string21_21()
+        {
+            // Arrange
+            string input_string = "21";
+            int expected_result = 21;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_stringPlus73_73()
+        {
+            // Arrange
+            string input_string = "+73";
+            int expected_result = 73;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_stringPlus99999_99999()
+        {
+            // Arrange
+            string input_string = "+99999";
+            int expected_result = 99999;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_stringMinus35_minus35()
+        {
+            // Arrange
+            string input_string = "-35";
+            int expected_result = -35;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_string17and6k_17600()
+        {
+            // Arrange
+            string input_string = "17,6k";
+            int expected_result = 17600;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
+        }
+
+        [TestMethod]
+        public void StringToDigitPositive_string9and3m_9300000()
+        {
+            // Arrange
+            string input_string = "9,3m";
+            int expected_result = 9300000;
+
+            // Act
+            int actual_result = GrabberCore.StringToDigit(input_string);
+
+            // Assert
+            Assert.AreEqual(actual_result, expected_result);
         }
     }
 }

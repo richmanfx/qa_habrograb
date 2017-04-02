@@ -97,10 +97,11 @@ namespace qa_habrograb
         {
             // Информация об авторах
             List<AuthorInfo> AiList = new List<AuthorInfo>();
-            // TODO: Заполнять в цикле про нескольких авторов - второму автору вводная  :-)
-            AiList.Add(new AuthorInfo(Config.author.author_name, Config.author.author_email));
+            // Заполнять в цикле про нескольких авторов - второму автору вводная  :-)
+            //AiList.Add(new AuthorInfo(Config.author.author_name, Config.author.author_email));
+            AiList.Add(new AuthorInfo("Александр Ящук", "a.yashuk@pflb.ru"));    // А ты думал это в конфиге?  ;^)
 
-            List<GrabResults> grabResultsList = new List<GrabResults>();        // Коллекция результатов грабинга
+            List <GrabResults> grabResultsList = new List<GrabResults>();        // Коллекция результатов грабинга
 
             // Описание источника новостей
             string habr_logo = System.IO.File.ReadAllText(QAHabroGrabProgram.habr_logo_file_name, Encoding.Default);    // Логотип
@@ -241,9 +242,8 @@ namespace qa_habrograb
         }
 
 
-        // TODO: Тесты написать!
         /// Преобразовывает строки в знаковый int32
-        private static int StringToDigit(string inputString)
+        public static int StringToDigit(string inputString)
         {
             int Digit = 0;
 
@@ -277,7 +277,7 @@ namespace qa_habrograb
                 string choppedInputString = inputString.Substring(0, inputString.Length - 1);
 
                 // Разбить на тысячные порядки
-                // TODO: Пока не нашёл с двумя запятыми - в будущем доделать.
+                // TODO: Пока не нашёл с двумя запятыми - в будущем сделать при необходимости.
 
                 // Собрать результат
                 try
