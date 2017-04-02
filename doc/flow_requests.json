@@ -1,0 +1,86 @@
+{
+  "front-version": "2.2.1",
+  "version": 3,
+  "nodes": [
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"name\":\"habrograbber\",\n  \"url\":\"http://localhost:7777\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:3000",
+        "path": "/api/grabbers"
+      },
+      "id": "E672D100-CEAD-4DEA-813D-19C2EE4EF13D",
+      "lastModified": "2017-03-24T11:07:57.046+03:00",
+      "name": "Добавление грабера в ядро.",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Basic YWRtaW46cGFzc3dvcmQ="
+        },
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {
+        "ownerId": null
+      }
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"name\":\"habrograbber\",\n  \"moderatorEmail\":\"moder@testtand.ru\",\n  \"grabberQueries\":[\n    {\n      \"grabber\":\"http://localhost:3000/api/grabbers/1\",\n      \"queries\":[\"sqa\", \"testing\", \"Мо\"]\n    }\n  ]\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:3000",
+        "path": "/api/channels"
+      },
+      "id": "DCE27DA6-48DC-4D57-82E4-71B228C8DA21",
+      "lastModified": "2017-03-27T18:22:17.580+03:00",
+      "name": "Запрос на грабинг.",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Basic YWRtaW46cGFzc3dvcmQ="
+        },
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {
+        "ownerId": null
+      }
+    }
+  ]
+}
