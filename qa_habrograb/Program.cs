@@ -25,7 +25,7 @@ namespace qa_habrograb
         public static GrabResponse grab_response = new GrabResponse(true);                      // Ответ на /grab
         public static RequestsQueue req_q;                                      // Очередь запросов на граббинг
         public static ResultsQueue res_q;                                       // Очеред результатов грабинга                    
-        public static string grab_version = "1.0.7";                            // Версия программы
+        public static string grab_version = "1.0.8";                            // Версия программы
         public static string habr_logo_file_name = "logo_habr.base64";          // Логотип источника новостей в base64
 
 
@@ -113,7 +113,7 @@ namespace qa_habrograb
                     {
                         /// TODO: Заполнить состояние грабера - всё не ОК в ErrorInfo.
 
-                        log.Debug(String.Format("{0}: Результат грабинга НЕ размещён в очереди. {1}",
+                        log.Error(String.Format("{0}: Результат грабинга НЕ размещён в очереди. {1}",
                                                 Thread.CurrentThread.Name,
                                                 result));
                     }

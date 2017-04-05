@@ -40,7 +40,7 @@ namespace qa_habrograb
             }
             catch (WebException)
             {
-                log.Debug(String.Format("{0}: Ошибка соединения с сервером-Ядром.", Thread.CurrentThread.Name));
+                log.Error(String.Format("{0}: Ошибка соединения с сервером-Ядром.", Thread.CurrentThread.Name));
             }
 
             // Отправить запрос Ядру и получить ответ
@@ -52,7 +52,7 @@ namespace qa_habrograb
             }
             catch (Exception)
             {
-                log.Debug(String.Format("{0}: Не удалась отправка результата Ядру.", Thread.CurrentThread.Name));
+                log.Error(String.Format("{0}: Не удалась отправка результата Ядру.", Thread.CurrentThread.Name));
 
             }
 
@@ -76,7 +76,7 @@ namespace qa_habrograb
                 }
                 catch (Exception ex)
                 {
-                    log.Debug(String.Format("{0}: Ответ \"GrabResultsResponse\" от Ядра имеет неверную структуру:\n{1}",
+                    log.Error(String.Format("{0}: Ответ \"GrabResultsResponse\" от Ядра имеет неверную структуру:\n{1}",
                                             Thread.CurrentThread.Name,
                                             ex));
                 }

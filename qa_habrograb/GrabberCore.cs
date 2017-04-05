@@ -138,7 +138,7 @@ namespace qa_habrograb
                 }
                 catch (NoSuchElementException)
                 {
-                    log.Debug(String.Format("{0}: Картинка не нашлась на странице: \"{1}\"", 
+                    log.Error(String.Format("{0}: Картинка не нашлась на странице: \"{1}\"", 
                                             Thread.CurrentThread.Name, 
                                             small_article.TitleLink));
                 }
@@ -163,7 +163,7 @@ namespace qa_habrograb
                         GrabbingResult.SourceDescription.Image = "data:" + image_mime_type + ";base64," + Convert.ToBase64String(image_file_as_byte);
                     } catch (System.Net.WebException)
                     {
-                        log.Debug(String.Format("{0}: Изображение получить не удалось: \"{1}\"", Thread.CurrentThread.Name, image_url));
+                        log.Error(String.Format("{0}: Изображение получить не удалось: \"{1}\"", Thread.CurrentThread.Name, image_url));
                     }
                 }
                 GrabbingResult.Processing.FinishTime = DateTime.Now.ToString("s");      // Время окончания грабинга
@@ -192,7 +192,7 @@ namespace qa_habrograb
             }
             catch (Exception)
             {
-                log.Debug(String.Format("{0}: Не найдено значение Общего рейтинга страницы.", Thread.CurrentThread.Name));
+                log.Error(String.Format("{0}: Не найдено значение Общего рейтинга страницы.", Thread.CurrentThread.Name));
             }
             int digitRating = StringToDigit(rating);
 
@@ -206,7 +206,7 @@ namespace qa_habrograb
             }
             catch (Exception)
             {
-                log.Debug(String.Format("{0}: Не найдено значение Количества просмотров страницы.", Thread.CurrentThread.Name));
+                log.Error(String.Format("{0}: Не найдено значение Количества просмотров страницы.", Thread.CurrentThread.Name));
             }
             int digitViewsNumber = StringToDigit(viewsNumber);
 
@@ -220,7 +220,7 @@ namespace qa_habrograb
             }
             catch (Exception)
             {
-                log.Debug(String.Format("{0}: Не найдено значение Количества добавлений в избранное.", Thread.CurrentThread.Name));
+                log.Error(String.Format("{0}: Не найдено значение Количества добавлений в избранное.", Thread.CurrentThread.Name));
             }
             int digitFavouritesAddingr = StringToDigit(favouritesAdding);
 
